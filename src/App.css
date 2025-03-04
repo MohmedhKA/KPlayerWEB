@@ -1,0 +1,182 @@
+/* App Layout */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #121212;
+  color: white;
+}
+
+.app-header {
+  padding: 20px;
+  background-color: #282828;
+}
+
+.app-header h1 {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.app-footer {
+  background-color: #282828;
+  padding: 20px;
+  border-top: 1px solid #404040;
+}
+
+/* Search Bar */
+.search-bar {
+  margin-bottom: 20px;
+}
+
+.search-bar form {
+  display: flex;
+  gap: 10px;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background-color: #404040;
+  color: white;
+}
+
+.search-bar button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  background-color: #1db954;
+  color: white;
+  cursor: pointer;
+}
+
+.search-bar button:hover {
+  background-color: #1ed760;
+}
+
+/* Song List */
+.song-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.song-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #282828;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.song-item:hover {
+  background-color: #404040;
+}
+
+.song-item.active {
+  background-color: #404040;
+}
+
+.song-thumbnail {
+  width: 50px;
+  height: 50px;
+  border-radius: 4px;
+  margin-right: 15px;
+}
+
+.song-details {
+  flex: 1;
+}
+
+.song-title {
+  margin: 0;
+  font-size: 16px;
+}
+
+.song-artist {
+  margin: 5px 0 0 0;
+  font-size: 14px;
+  color: #b3b3b3;
+}
+
+.song-duration {
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+/* Music Player */
+.music-player {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.music-player .song-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.music-player .thumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 4px;
+}
+
+.music-player .details h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.music-player .details p {
+  margin: 5px 0 0 0;
+  font-size: 14px;
+  color: #b3b3b3;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.controls button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.controls button:hover {
+  background-color: #404040;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 4px;
+  background-color: #404040;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background-color: #1db954;
+  transition: width 0.1s linear;
+} 
