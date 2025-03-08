@@ -3,6 +3,7 @@ import axios from 'axios';
 import SearchBar from './components/SearchBar';
 import SongList from './components/SongList';
 import MusicPlayer from './components/MusicPlayer';
+import AddSongButton from './components/AddSongButton';
 import './App.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
@@ -55,6 +56,10 @@ function App() {
     setCurrentIndex(-1);
   };
 
+  const handleSongAdded = (newSong) => {
+    setSongs(prevSongs => [...prevSongs, newSong]);
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -76,6 +81,7 @@ function App() {
           onPrevious={handlePrevious}
         />
       </footer>
+      <AddSongButton onSongAdded={handleSongAdded} />
     </div>
   );
 }
