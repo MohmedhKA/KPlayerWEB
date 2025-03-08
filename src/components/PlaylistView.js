@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { FaPlay, FaPause } from 'react-icons/fa';
 import './PlaylistView.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
@@ -12,9 +13,10 @@ const EMOTION_PLAYLISTS = [
   { id: 'excitement', name: 'Excitement', emotion: 'Excitement' }
 ];
 
-const PlaylistView = ({ onPlaylistSelect }) => {
+const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [playlistSongs, setPlaylistSongs] = useState({});
+  const [showSongs, setShowSongs] = useState(false);
 
   useEffect(() => {
     EMOTION_PLAYLISTS.forEach(fetchPlaylistSongs);
@@ -40,6 +42,7 @@ const PlaylistView = ({ onPlaylistSelect }) => {
   const handlePlaylistClick = async (playlist) => {
     console.log('Playlist clicked:', playlist);
     setSelectedPlaylist(playlist);
+    setShowSongs(true);
     
     try {
       console.log(`Fetching songs for selected emotion: ${playlist.emotion}`);
@@ -58,6 +61,54 @@ const PlaylistView = ({ onPlaylistSelect }) => {
       console.error('Error fetching playlist songs:', error);
     }
   };
+
+  const handleBackClick = () => {
+    setShowSongs(false);
+    setSelectedPlaylist(null);
+  };
+
+  const handleSongClick = (song) => {
+    onSongSelect(song);
+  };
+
+  if (showSongs && selectedPlaylist) {
+    const songs = playlistSongs[selectedPlaylist.id] || [];
+    return (
+      <div className="playlist-view">
+        <div className="playlist-header">
+          <button className="back-button" onClick={handleBackClick}>
+            ← Back to Playlists
+          </button>
+          <h2>{selectedPlaylist.name} Playlist</h2>
+          <p>{songs.length} songs</p>
+        </div>
+        <div className="playlist-songs">
+          {songs.map((song, index) => (
+            <div 
+              key={song.id} 
+              className={`song-item ${currentSong?.id === song.id ? 'playing' : ''}`}
+              onClick={() => handleSongClick(song)}
+            >
+              <div className="song-number">
+                {currentSong?.id === song.id ? (
+                  <FaPlay className="playing-icon" />
+                ) : (
+                  index + 1
+                )}
+              </div>
+              <div className="song-thumbnail">
+                <img src={song.thumbnailUrl || `${BASE_URL}/thumbnails/default.jpg`} alt={song.title} />
+              </div>
+              <div className="song-info">
+                <div className="song-title">{song.title}</div>
+                <div className="song-artist">{song.artist}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="playlist-view">

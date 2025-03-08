@@ -84,7 +84,11 @@ function App() {
             onSongSelect={handleSongSelect}
           />
         ) : (
-          <PlaylistView onPlaylistSelect={handlePlaylistSelect} />
+          <PlaylistView 
+            onPlaylistSelect={handlePlaylistSelect}
+            currentSong={currentSong}
+            onSongSelect={handleSongSelect}
+          />
         )}
       </main>
       <footer className="app-footer">
