@@ -4,6 +4,8 @@ import SearchBar from './components/SearchBar';
 import SongList from './components/SongList';
 import MusicPlayer from './components/MusicPlayer';
 import AddSongButton from './components/AddSongButton';
+import TabNavigation from './components/TabNavigation';
+import PlaylistView from './components/PlaylistView';
 import './App.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
@@ -12,6 +14,7 @@ function App() {
   const [songs, setSongs] = useState([]);
   const [currentSong, setCurrentSong] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(-1);
+  const [activeTab, setActiveTab] = useState('home');
 
   useEffect(() => {
     fetchSongs();
@@ -60,18 +63,29 @@ function App() {
     setSongs(prevSongs => [...prevSongs, newSong]);
   };
 
+  const handlePlaylistSelect = (playlistSongs) => {
+    setSongs(playlistSongs);
+    setCurrentSong(null);
+    setCurrentIndex(-1);
+  };
+
   return (
     <div className="app">
       <header className="app-header">
         <h1>Music Streaming</h1>
         <SearchBar onSearchResults={handleSearchResults} />
+        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
       </header>
       <main className="app-main">
-        <SongList
-          songs={songs}
-          currentSong={currentSong}
-          onSongSelect={handleSongSelect}
-        />
+        {activeTab === 'home' ? (
+          <SongList
+            songs={songs}
+            currentSong={currentSong}
+            onSongSelect={handleSongSelect}
+          />
+        ) : (
+          <PlaylistView onPlaylistSelect={handlePlaylistSelect} />
+        )}
       </main>
       <footer className="app-footer">
         <MusicPlayer
