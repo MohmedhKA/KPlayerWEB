@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Howl } from 'howler';
-import { FaPlay, FaPause, FaStepForward, FaStepBackward } from 'react-icons/fa';
+import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaVolumeUp, FaVolumeMute, FaPlus } from 'react-icons/fa';
 import axios from 'axios';
+import PlaylistPopup from './PlaylistPopup';
 import './MusicPlayer.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
@@ -13,16 +14,20 @@ const MusicPlayer = ({ currentSong, playlist, onNext, onPrevious }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const [showPlaylistPopup, setShowPlaylistPopup] = useState(false);
   const soundRef = useRef(null);
   const progressInterval = useRef(null);
   const progressBarRef = useRef(null);
   const seekTimeout = useRef(null);
+  const previousVolume = useRef(volume);
 
-  const updateTimeAndProgress = useCallback((seek) => {
+  const updateTimeAndProgress = useCallback(() => {
     if (!soundRef.current) return;
     
     try {
-      const currentSeek = seek ?? soundRef.current.seek();
+      const currentSeek = soundRef.current.seek();
       const currentDuration = soundRef.current.duration();
       
       if (typeof currentSeek === 'number' && typeof currentDuration === 'number' && currentDuration > 0) {
@@ -39,10 +44,8 @@ const MusicPlayer = ({ currentSong, playlist, onNext, onPrevious }) => {
       clearInterval(progressInterval.current);
     }
     
-    // Update progress immediately
     updateTimeAndProgress();
     
-    // Set up interval for continuous updates
     progressInterval.current = setInterval(() => {
       if (soundRef.current && soundRef.current.playing()) {
         updateTimeAndProgress();
@@ -54,88 +57,64 @@ const MusicPlayer = ({ currentSong, playlist, onNext, onPrevious }) => {
     if (progressInterval.current) {
       clearInterval(progressInterval.current);
       progressInterval.current = null;
-      console.log('Stopped progress interval');
     }
   }, []);
-
-  const createHowl = useCallback((songUrl) => {
-    if (soundRef.current) {
-      soundRef.current.unload();
-    }
-    
-    const sound = new Howl({
-      src: [songUrl],
-      html5: true,
-      format: ['mp3'],
-      autoplay: true,
-      preload: true,
-      onload: function() {
-        console.log('Song loaded successfully');
-        setDuration(this.duration());
-        setIsLoading(false);
-      },
-      onloaderror: (id, error) => {
-        console.error('Error loading song:', error);
-        setIsLoading(false);
-        setIsPlaying(false);
-      },
-      onplay: () => {
-        console.log('Song started playing');
-        setIsPlaying(true);
-        startProgressInterval();
-      },
-      onpause: () => {
-        console.log('Song paused');
-        setIsPlaying(false);
-        stopProgressInterval();
-      },
-      onend: () => {
-        console.log('Song ended');
-        stopProgressInterval();
-        setProgress(0);
-        setCurrentTime(0);
-        setIsPlaying(false);
-        onNext();
-      },
-      onstop: () => {
-        stopProgressInterval();
-        setIsPlaying(false);
-      },
-      onseek: () => {
-        updateTimeAndProgress();
-      }
-    });
-    
-    return sound;
-  }, [onNext, startProgressInterval, stopProgressInterval, updateTimeAndProgress]);
 
   useEffect(() => {
     const loadSong = async () => {
       if (currentSong) {
         setIsLoading(true);
-        // Cleanup previous sound
+        
         if (soundRef.current) {
+          soundRef.current.stop();
           soundRef.current.unload();
-          soundRef.current = null;
         }
+
         stopProgressInterval();
         setProgress(0);
         setCurrentTime(0);
         setDuration(0);
-        setIsPlaying(false);
-//as it is autoplay
+
         try {
-          console.log('Loading song:', currentSong.title);
-          const response = await axios.get(`${BASE_URL}/api/music/play/${encodeURIComponent(currentSong.title)}`);
-          
-          if (response.data.success && response.data.data) {
-            let songUrl = `${BASE_URL}/music/${encodeURIComponent(response.data.data.title)}(MP3_320K).mp3`;
-            songUrl = songUrl.replace(/%2C/g, '_');
-            songUrl = songUrl.replace(/%26/g, '_');
-            songUrl = songUrl.replace(/%7C/g, '_');
-            
-            soundRef.current = createHowl(songUrl);
-          }
+          const sound = new Howl({
+            src: [currentSong.fileUrl],
+            html5: true,
+            volume: volume,
+            onload: () => {
+              setDuration(sound.duration());
+              setIsLoading(false);
+              sound.play();
+            },
+            onplay: () => {
+              setIsPlaying(true);
+              startProgressInterval();
+            },
+            onpause: () => {
+              setIsPlaying(false);
+              stopProgressInterval();
+            },
+            onstop: () => {
+              setIsPlaying(false);
+              stopProgressInterval();
+            },
+            onend: () => {
+              stopProgressInterval();
+              setProgress(0);
+              setCurrentTime(0);
+              setIsPlaying(false);
+              onNext();
+            },
+            onseek: () => {
+              updateTimeAndProgress();
+            },
+            onloaderror: (id, error) => {
+              console.error('Error loading song:', error);
+              setIsLoading(false);
+              setIsPlaying(false);
+            }
+          });
+
+          soundRef.current = sound;
         } catch (error) {
           console.error('Error loading song:', error);
           setIsLoading(false);
@@ -147,143 +126,77 @@ const MusicPlayer = ({ currentSong, playlist, onNext, onPrevious }) => {
 
     return () => {
       if (soundRef.current) {
+        soundRef.current.stop();
         soundRef.current.unload();
-        soundRef.current = null;
       }
       stopProgressInterval();
       if (seekTimeout.current) {
         clearTimeout(seekTimeout.current);
-        seekTimeout.current = null;
       }
     };
-  }, [currentSong, createHowl, stopProgressInterval]);
+  }, [currentSong, volume, onNext, startProgressInterval, stopProgressInterval, updateTimeAndProgress]);
 
-  const togglePlay = () => {
+  const handlePlayPause = () => {
     if (!soundRef.current || isLoading) return;
 
-    try {
-      if (soundRef.current.playing()) {
-        console.log('Pausing playback');
-        soundRef.current.pause();
-      } else {
-        console.log('Resuming playback');
-        soundRef.current.play();
-      }
-    } catch (error) {
-      console.error('Error toggling play:', error);
+    if (soundRef.current.playing()) {
+      soundRef.current.pause();
+    } else {
+      soundRef.current.play();
     }
   };
 
-  const handleNext = () => {
-    stopProgressInterval();
-    setIsPlaying(false);
-    onNext();
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    if (soundRef.current) {
+      soundRef.current.volume(newVolume);
+    }
+    if (newVolume > 0) {
+      setIsMuted(false);
+    }
   };
 
-  const handlePrevious = () => {
-    stopProgressInterval();
-    setIsPlaying(false);
-    onPrevious();
+  const handleMuteToggle = () => {
+    if (isMuted) {
+      setVolume(previousVolume.current);
+      if (soundRef.current) {
+        soundRef.current.volume(previousVolume.current);
+      }
+    } else {
+      previousVolume.current = volume;
+      setVolume(0);
+      if (soundRef.current) {
+        soundRef.current.volume(0);
+      }
+    }
+    setIsMuted(!isMuted);
   };
 
   const handleSeek = (seekTime) => {
     if (!soundRef.current || typeof seekTime !== 'number') return;
     
-    // Clear any existing seek timeout
     if (seekTimeout.current) {
       clearTimeout(seekTimeout.current);
-      seekTimeout.current = null;
     }
 
-    try {
-      // Stop the current playback to prevent potential audio artifacts
-      soundRef.current.pause();
-      
-      // Seek to the new time
-      soundRef.current.seek(seekTime);
-      
-      // Update current time and progress
-      updateTimeAndProgress(seekTime);
-      
-      // Restart playback if it was playing before
-      if (isPlaying) {
-        soundRef.current.play();
-      }
-      
-      // Restart progress interval if playing
-      if (isPlaying) {
-        startProgressInterval();
-      }
-    } catch (error) {
-      console.error('Error during seek:', error);
-    }
-  };
-
-  const updateProgress = (clientX) => {
-    if (!soundRef.current || !progressBarRef.current || isLoading) return;
-
-    const progressBar = progressBarRef.current;
-    const rect = progressBar.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const width = rect.width;
-    const percentage = Math.max(0, Math.min(100, (x / width) * 100));
-    
-    const seekTime = (percentage / 100) * soundRef.current.duration();
-    setCurrentTime(seekTime);
-    setProgress(percentage);
-    return seekTime;
+    soundRef.current.seek(seekTime);
+    updateTimeAndProgress();
   };
 
   const handleProgressBarClick = (e) => {
     if (!soundRef.current || isLoading) return;
     
-    const seekTime = updateProgress(e.clientX);
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = (x / rect.width) * 100;
+    const seekTime = (percentage / 100) * soundRef.current.duration();
     
-    // Debounce the seek to prevent multiple rapid seeks
-    if (seekTimeout.current) {
-      clearTimeout(seekTimeout.current);
-    }
-    
-    seekTimeout.current = setTimeout(() => {
-      handleSeek(seekTime);
-    }, 100);
-  };
-
-  const handleMouseDown = (e) => {
-    if (isLoading) return;
-    setIsDragging(true);
-    updateProgress(e.clientX);
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-
-  const handleMouseMove = (e) => {
-    if (isDragging) {
-      updateProgress(e.clientX);
-    }
-  };
-
-  const handleMouseUp = (e) => {
-    if (isDragging) {
-      setIsDragging(false);
-      const seekTime = updateProgress(e.clientX);
-      
-      // Debounce the seek to prevent multiple rapid seeks
-      if (seekTimeout.current) {
-        clearTimeout(seekTimeout.current);
-      }
-      
-      seekTimeout.current = setTimeout(() => {
-        handleSeek(seekTime);
-      }, 100);
-
-      // Remove event listeners
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    }
+    handleSeek(seekTime);
   };
 
   const formatTime = (seconds) => {
+    if (isNaN(seconds)) return '0:00';
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
@@ -291,50 +204,81 @@ const MusicPlayer = ({ currentSong, playlist, onNext, onPrevious }) => {
 
   return (
     <div className="music-player">
-      {currentSong && (
-        <>
-          <div className="song-info">
+      <div className="player-left">
+        {currentSong && (
+          <>
             <img 
-              src={currentSong.thumbnailUrl}
+              src={currentSong.thumbnailUrl || `${BASE_URL}/thumbnails/default.jpg`}
               alt={currentSong.title}
-              className="thumbnail"
+              className="current-song-thumbnail"
             />
-            <div className="details">
-              <div className="marquee-container">
-                <div className="marquee-text">
-                  {currentSong.title}
-                </div>
-              </div>
-              <p>{currentSong.artist}</p>
+            <div className="current-song-info">
+              <div className="current-song-title">{currentSong.title}</div>
+              <div className="current-song-artist">{currentSong.artist}</div>
             </div>
-          </div>
-          <div className="controls">
-            <button onClick={handlePrevious} disabled={isLoading}>
-              <FaStepBackward />
-            </button>
-            <button onClick={togglePlay} disabled={isLoading}>
-              {isPlaying ? <FaPause /> : <FaPlay />}
-            </button>
-            <button onClick={handleNext} disabled={isLoading}>
-              <FaStepForward />
-            </button>
-          </div>
-          <div className="progress-container">
-            <span className="time">{formatTime(currentTime)}</span>
+          </>
+        )}
+      </div>
+
+      <div className="player-center">
+        <div className="player-controls">
+          <button onClick={onPrevious} disabled={isLoading}>
+            <FaStepBackward />
+          </button>
+          <button onClick={handlePlayPause} disabled={isLoading} className="play-pause-button">
+            {isPlaying ? <FaPause /> : <FaPlay />}
+          </button>
+          <button onClick={onNext} disabled={isLoading}>
+            <FaStepForward />
+          </button>
+        </div>
+        
+        <div className="progress-container">
+          <span className="time">{formatTime(currentTime)}</span>
+          <div 
+            className="progress-bar" 
+            ref={progressBarRef}
+            onClick={handleProgressBarClick}
+          >
             <div 
-              className="progress-bar" 
-              ref={progressBarRef}
-              onClick={handleProgressBarClick}
-              onMouseDown={handleMouseDown}
-            >
-              <div 
-                className="progress"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <span className="time">{formatTime(duration)}</span>
+              className="progress"
+              style={{ width: `${progress}%` }}
+            />
           </div>
-        </>
+          <span className="time">{formatTime(duration)}</span>
+        </div>
+      </div>
+
+      <div className="player-right">
+        {currentSong && (
+          <button 
+            className="add-to-playlist-button"
+            onClick={() => setShowPlaylistPopup(true)}
+            title="Add to Playlist"
+          >
+            <FaPlus />
+          </button>
+        )}
+        <button onClick={handleMuteToggle} className="volume-button">
+          {isMuted || volume === 0 ? <FaVolumeMute /> : <FaVolumeUp />}
+        </button>
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={volume}
+          onChange={handleVolumeChange}
+          className="volume-slider"
+        />
+      </div>
+
+      {showPlaylistPopup && (
+        <PlaylistPopup
+          isOpen={showPlaylistPopup}
+          onClose={() => setShowPlaylistPopup(false)}
+          song={currentSong}
+        />
       )}
     </div>
   );

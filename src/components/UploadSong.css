@@ -1,0 +1,157 @@
+.upload-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.upload-modal {
+  background: #1a1a1a;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.close-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.drop-zone {
+  border: 2px dashed #444;
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  background: #222;
+}
+
+.drop-zone.dragging {
+  border-color: #1db954;
+  background: rgba(29, 185, 84, 0.1);
+}
+
+.drop-zone:hover {
+  border-color: #666;
+  background: #2a2a2a;
+}
+
+.drop-text {
+  color: #888;
+}
+
+.drop-text p {
+  margin: 4px 0;
+}
+
+.selected-file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #333;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #fff;
+}
+
+.file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 12px;
+}
+
+.remove-file {
+  background: none;
+  border: none;
+  color: #ff4444;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.remove-file:hover {
+  background-color: rgba(255, 68, 68, 0.1);
+}
+
+.emotion-selector {
+  margin-bottom: 20px;
+}
+
+.emotion-selector label {
+  display: block;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.emotion-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  background: #333;
+  border: 1px solid #444;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.emotion-select:focus {
+  outline: none;
+  border-color: #1db954;
+}
+
+.error-message {
+  color: #ff4444;
+  margin-bottom: 16px;
+  padding: 8px;
+  background: rgba(255, 68, 68, 0.1);
+  border-radius: 4px;
+}
+
+.upload-button {
+  width: 100%;
+  padding: 12px;
+  background: #1db954;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.upload-button:hover:not(:disabled) {
+  background: #1ed760;
+}
+
+.upload-button:disabled {
+  background: #444;
+  cursor: not-allowed;
+} 

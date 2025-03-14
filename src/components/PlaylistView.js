@@ -1,64 +1,152 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaPlay, FaPause } from 'react-icons/fa';
+import { FaPlay, FaPause, FaTrash } from 'react-icons/fa';
 import './PlaylistView.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 
 const EMOTION_PLAYLISTS = [
-  { id: 'surprise', name: 'Surprise', emotion: 'Surprise' },
-  { id: 'sad', name: 'Sad', emotion: 'Sad' },
-  { id: 'anger', name: 'Anger', emotion: 'Anger' },
-  { id: 'joy', name: 'Joy', emotion: 'Joy' },
-  { id: 'excitement', name: 'Excitement', emotion: 'Excitement' }
+  { id: 'surprise', name: 'Surprise', emotion: 'Surprise', thumbnail: 'Surprise_playlist.jpg' },
+  { id: 'sad', name: 'Sad', emotion: 'Sad', thumbnail: 'Sad_playlist.jpg' },
+  { id: 'anger', name: 'Anger', emotion: 'Anger', thumbnail: 'Anger_playlist.jpg' },
+  { id: 'joy', name: 'Joy', emotion: 'Joy', thumbnail: 'Joy_playlist.jpg' },
+  { id: 'excitement', name: 'Excitement', emotion: 'Excitement', thumbnail: 'Excitement_playlist.jpg' }
 ];
 
 const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [playlistSongs, setPlaylistSongs] = useState({});
   const [showSongs, setShowSongs] = useState(false);
+  const [userPlaylists, setUserPlaylists] = useState([]);
+  const [activeTab, setActiveTab] = useState('emotion'); // 'emotion' or 'user'
 
   useEffect(() => {
     EMOTION_PLAYLISTS.forEach(fetchPlaylistSongs);
+    fetchUserPlaylists();
   }, []);
+
+  // Add a new useEffect to fetch playlists when tab changes
+  useEffect(() => {
+    if (activeTab === 'user') {
+      fetchUserPlaylists();
+    }
+  }, [activeTab]);
+
+  const fetchUserPlaylists = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/playlists`);
+      if (response.data.success) {
+        // Also fetch songs for each playlist
+        const playlists = response.data.data;
+        setUserPlaylists(playlists);
+        
+        // Fetch songs for each playlist
+        playlists.forEach(async (playlist) => {
+          try {
+            const songsResponse = await axios.get(`${BASE_URL}/api/playlists/${playlist.id}`);
+            if (songsResponse.data.success) {
+              setPlaylistSongs(prev => ({
+                ...prev,
+                [playlist.id]: songsResponse.data.data.songs
+              }));
+            }
+          } catch (error) {
+            console.error(`Error fetching songs for playlist ${playlist.name}:`, error);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user playlists:', error);
+    }
+  };
 
   const fetchPlaylistSongs = async (playlist) => {
     try {
-      console.log(`Fetching songs for emotion: ${playlist.emotion}`);
-      const response = await axios.get(`${BASE_URL}/api/music?emotion=${playlist.emotion}`);
-      console.log(`Response for ${playlist.emotion}:`, response.data);
-      
-      if (response.data.success) {
-        setPlaylistSongs(prev => ({
-          ...prev,
-          [playlist.id]: response.data.data
-        }));
+      if (playlist.emotion) {
+        // Emotion playlist
+        const response = await axios.get(`${BASE_URL}/api/music?emotion=${playlist.emotion}`);
+        if (response.data.success) {
+          setPlaylistSongs(prev => ({
+            ...prev,
+            [playlist.id]: response.data.data
+          }));
+        }
+      } else {
+        // User playlist
+        const response = await axios.get(`${BASE_URL}/api/playlists/${playlist.id}`);
+        if (response.data.success) {
+          setPlaylistSongs(prev => ({
+            ...prev,
+            [playlist.id]: response.data.data.songs
+          }));
+        }
       }
     } catch (error) {
-      console.error(`Error fetching songs for ${playlist.emotion}:`, error);
+      console.error(`Error fetching songs for playlist ${playlist.name}:`, error);
     }
   };
 
   const handlePlaylistClick = async (playlist) => {
-    console.log('Playlist clicked:', playlist);
     setSelectedPlaylist(playlist);
     setShowSongs(true);
     
     try {
-      console.log(`Fetching songs for selected emotion: ${playlist.emotion}`);
-      const response = await axios.get(`${BASE_URL}/api/music?emotion=${playlist.emotion}`);
-      console.log('Playlist songs response:', response.data);
-      
-      if (response.data.success) {
-        const songs = response.data.data;
-        setPlaylistSongs(prev => ({
-          ...prev,
-          [playlist.id]: songs
-        }));
-        onPlaylistSelect(songs);
+      if (playlist.emotion) {
+        // Emotion playlist
+        const response = await axios.get(`${BASE_URL}/api/music?emotion=${playlist.emotion}`);
+        if (response.data.success) {
+          const songs = response.data.data;
+          setPlaylistSongs(prev => ({
+            ...prev,
+            [playlist.id]: songs
+          }));
+          onPlaylistSelect(songs);
+        }
+      } else {
+        // User playlist
+        const response = await axios.get(`${BASE_URL}/api/playlists/${playlist.id}`);
+        if (response.data.success) {
+          const songs = response.data.data.songs;
+          setPlaylistSongs(prev => ({
+            ...prev,
+            [playlist.id]: songs
+          }));
+          onPlaylistSelect(songs);
+        }
       }
     } catch (error) {
       console.error('Error fetching playlist songs:', error);
+    }
+  };
+
+  const handleRemoveSong = async (songId) => {
+    if (!selectedPlaylist || selectedPlaylist.emotion) return;
+    
+    if (!window.confirm('Are you sure you want to remove this song from the playlist?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${BASE_URL}/api/playlists/${selectedPlaylist.id}/songs/${songId}`);
+      
+      // Update the songs list
+      const updatedSongs = playlistSongs[selectedPlaylist.id].filter(song => song.id !== songId);
+      setPlaylistSongs(prev => ({
+        ...prev,
+        [selectedPlaylist.id]: updatedSongs
+      }));
+      onPlaylistSelect(updatedSongs);
+
+      // Update the playlist in userPlaylists
+      const updatedPlaylists = userPlaylists.map(p => {
+        if (p.id === selectedPlaylist.id) {
+          return { ...p, song_count: (p.song_count || 1) - 1 };
+        }
+        return p;
+      });
+      setUserPlaylists(updatedPlaylists);
+    } catch (error) {
+      console.error('Error removing song from playlist:', error);
     }
   };
 
@@ -87,22 +175,38 @@ const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {
             <div 
               key={song.id} 
               className={`song-item ${currentSong?.id === song.id ? 'playing' : ''}`}
-              onClick={() => handleSongClick(song)}
             >
-              <div className="song-number">
-                {currentSong?.id === song.id ? (
-                  <FaPlay className="playing-icon" />
-                ) : (
-                  index + 1
-                )}
+              <div 
+                className="song-item-content"
+                onClick={() => handleSongClick(song)}
+              >
+                <div className="song-number">
+                  {currentSong?.id === song.id ? (
+                    <FaPlay className="playing-icon" />
+                  ) : (
+                    index + 1
+                  )}
+                </div>
+                <div className="song-thumbnail">
+                  <img src={song.thumbnailUrl || `${BASE_URL}/thumbnails/default.jpg`} alt={song.title} />
+                </div>
+                <div className="song-info">
+                  <div className="song-title">{song.title}</div>
+                  <div className="song-artist">{song.artist}</div>
+                </div>
               </div>
-              <div className="song-thumbnail">
-                <img src={song.thumbnailUrl || `${BASE_URL}/thumbnails/default.jpg`} alt={song.title} />
-              </div>
-              <div className="song-info">
-                <div className="song-title">{song.title}</div>
-                <div className="song-artist">{song.artist}</div>
-              </div>
+              {!selectedPlaylist.emotion && (
+                <button
+                  className="remove-song-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveSong(song.id);
+                  }}
+                  title="Remove from playlist"
+                >
+                  <FaTrash />
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -112,26 +216,62 @@ const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {
 
   return (
     <div className="playlist-view">
-      <h2>Emotion Playlists</h2>
+      <div className="playlist-tabs">
+        <button 
+          className={`tab-button ${activeTab === 'emotion' ? 'active' : ''}`}
+          onClick={() => setActiveTab('emotion')}
+        >
+          Emotion Playlists
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'user' ? 'active' : ''}`}
+          onClick={() => setActiveTab('user')}
+        >
+          Your Playlists
+        </button>
+      </div>
+
       <div className="playlists-grid">
-        {EMOTION_PLAYLISTS.map((playlist) => (
-          <div
-            key={playlist.id}
-            className={`playlist-card ${selectedPlaylist?.id === playlist.id ? 'selected' : ''}`}
-            onClick={() => handlePlaylistClick(playlist)}
-          >
-            <div className="playlist-image">
-              <img 
-                src={`${BASE_URL}/thumbnails/default_playlist.jpg`}
-                alt={playlist.name}
-              />
+        {activeTab === 'emotion' ? (
+          EMOTION_PLAYLISTS.map((playlist) => (
+            <div
+              key={playlist.id}
+              className={`playlist-card ${selectedPlaylist?.id === playlist.id ? 'selected' : ''}`}
+              onClick={() => handlePlaylistClick(playlist)}
+            >
+              <div className="playlist-image">
+                <img 
+                  src={`${BASE_URL}/thumbnails/${playlist.thumbnail}`}
+                  alt={playlist.name}
+                />
+              </div>
+              <div className="playlist-info">
+                <h3>{playlist.name}</h3>
+                <p>{(playlistSongs[playlist.id] || []).length} songs</p>
+              </div>
             </div>
-            <div className="playlist-info">
-              <h3>{playlist.name}</h3>
-              <p>{(playlistSongs[playlist.id] || []).length} songs</p>
+          ))
+        ) : (
+          // User Playlists
+          userPlaylists.map((playlist) => (
+            <div
+              key={playlist.id}
+              className={`playlist-card ${selectedPlaylist?.id === playlist.id ? 'selected' : ''}`}
+              onClick={() => handlePlaylistClick(playlist)}
+            >
+              <div className="playlist-image">
+                <img 
+                  src={playlist.thumbnailUrl || `${BASE_URL}/thumbnails/default_playlist.jpg`}
+                  alt={playlist.name}
+                />
+              </div>
+              <div className="playlist-info">
+                <h3>{playlist.name}</h3>
+                <p>{playlist.song_count || 0} songs</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

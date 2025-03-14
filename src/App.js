@@ -3,18 +3,21 @@ import axios from 'axios';
 import SearchBar from './components/SearchBar';
 import SongList from './components/SongList';
 import MusicPlayer from './components/MusicPlayer';
-import AddSongButton from './components/AddSongButton';
-import TabNavigation from './components/TabNavigation';
 import PlaylistView from './components/PlaylistView';
+import UploadSong from './components/UploadSong';
 import './App.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 
 function App() {
-  const [songs, setSongs] = useState([]);
+  const [allSongs, setAllSongs] = useState([]);
+  const [displayedSongs, setDisplayedSongs] = useState([]);
   const [currentSong, setCurrentSong] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [activeTab, setActiveTab] = useState('home');
+  const [currentPlaylist, setCurrentPlaylist] = useState(null);
+  const [slideDirection, setSlideDirection] = useState('right');
+  const [showUpload, setShowUpload] = useState(false);
 
   useEffect(() => {
     fetchSongs();
@@ -24,7 +27,8 @@ function App() {
     try {
       const response = await axios.get(`${BASE_URL}/api/music`);
       if (response.data.success) {
-        setSongs(response.data.data);
+        setAllSongs(response.data.data);
+        setDisplayedSongs(response.data.data);
       }
     } catch (error) {
       console.error('Error fetching songs:', error);
@@ -32,12 +36,19 @@ function App() {
   };
 
   const handleSongSelect = (song) => {
-    const index = songs.findIndex(s => s.id === song.id);
-    setCurrentIndex(index);
-    setCurrentSong(song);
+    const { audioUrl, ...songWithoutAudioUrl } = song;
+    let newIndex;
+    if (currentPlaylist) {
+      newIndex = displayedSongs.findIndex(s => s.id === song.id);
+    } else {
+      newIndex = allSongs.findIndex(s => s.id === song.id);
+    }
+    setCurrentIndex(newIndex);
+    setCurrentSong(songWithoutAudioUrl);
   };
 
   const handleNext = () => {
+    const songs = currentPlaylist ? displayedSongs : allSongs;
     if (currentIndex < songs.length - 1) {
       const nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
@@ -46,6 +57,7 @@ function App() {
   };
 
   const handlePrevious = () => {
+    const songs = currentPlaylist ? displayedSongs : allSongs;
     if (currentIndex > 0) {
       const prevIndex = currentIndex - 1;
       setCurrentIndex(prevIndex);
@@ -54,52 +66,113 @@ function App() {
   };
 
   const handleSearchResults = (results) => {
-    setSongs(results);
-    setCurrentSong(null);
-    setCurrentIndex(-1);
-  };
-
-  const handleSongAdded = (newSong) => {
-    setSongs(prevSongs => [...prevSongs, newSong]);
+    setDisplayedSongs(results);
+    setCurrentPlaylist(null);
   };
 
   const handlePlaylistSelect = (playlistSongs) => {
-    setSongs(playlistSongs);
-    setCurrentSong(null);
-    setCurrentIndex(-1);
+    setDisplayedSongs(playlistSongs);
+    setCurrentPlaylist(playlistSongs);
+    
+    if (currentSong) {
+      const newIndex = playlistSongs.findIndex(s => s.id === currentSong.id);
+      setCurrentIndex(newIndex >= 0 ? newIndex : -1);
+    }
+  };
+
+  const handleTabChange = (tab) => {
+    if (tab !== activeTab) {
+      setSlideDirection(tab === 'playlists' ? 'left' : 'right');
+      setActiveTab(tab);
+      if (tab === 'home') {
+        setDisplayedSongs(allSongs);
+        setCurrentPlaylist(null);
+        
+        if (currentSong) {
+          const newIndex = allSongs.findIndex(s => s.id === currentSong.id);
+          setCurrentIndex(newIndex >= 0 ? newIndex : -1);
+        }
+      }
+    }
+  };
+
+  const handleUploadComplete = (newSong) => {
+    setAllSongs(prev => [...prev, newSong]);
+    if (!currentPlaylist) {
+      setDisplayedSongs(prev => [...prev, newSong]);
+    }
   };
 
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Music Streaming</h1>
-        <SearchBar onSearchResults={handleSearchResults} />
-        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <h1 className="app-title">
+          <span>K</span>
+          <span className="player-text">Player</span>
+        </h1>
+        
+        <div className="tab-navigation">
+          <button
+            className={`tab-button ${activeTab === 'home' ? 'active' : ''}`}
+            onClick={() => handleTabChange('home')}
+          >
+            Home
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'playlists' ? 'active' : ''}`}
+            onClick={() => handleTabChange('playlists')}
+          >
+            Playlists
+          </button>
+        </div>
+
+        <div className="search-container">
+          <SearchBar onSearchResults={handleSearchResults} />
+        </div>
       </header>
+
       <main className="app-main">
-        {activeTab === 'home' ? (
-          <SongList
-            songs={songs}
-            currentSong={currentSong}
-            onSongSelect={handleSongSelect}
-          />
-        ) : (
-          <PlaylistView 
-            onPlaylistSelect={handlePlaylistSelect}
-            currentSong={currentSong}
-            onSongSelect={handleSongSelect}
-          />
-        )}
+        <div className={`tab-container ${slideDirection}`}>
+          <div className={`tab-content ${activeTab === 'home' ? 'active' : ''}`}>
+            <SongList
+              songs={displayedSongs}
+              currentSong={currentSong}
+              onSongSelect={handleSongSelect}
+            />
+          </div>
+          <div className={`tab-content ${activeTab === 'playlists' ? 'active' : ''}`}>
+            <PlaylistView 
+              onPlaylistSelect={handlePlaylistSelect}
+              currentSong={currentSong}
+              onSongSelect={handleSongSelect}
+            />
+          </div>
+        </div>
       </main>
+
       <footer className="app-footer">
         <MusicPlayer
           currentSong={currentSong}
-          playlist={songs}
+          playlist={displayedSongs}
           onNext={handleNext}
           onPrevious={handlePrevious}
         />
       </footer>
-      <AddSongButton onSongAdded={handleSongAdded} />
+
+      <button 
+        className="upload-fab"
+        onClick={() => setShowUpload(true)}
+        aria-label="Upload song"
+      >
+        +
+      </button>
+
+      {showUpload && (
+        <UploadSong
+          onUploadComplete={handleUploadComplete}
+          onClose={() => setShowUpload(false)}
+        />
+      )}
     </div>
   );
 }
