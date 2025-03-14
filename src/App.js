@@ -23,6 +23,23 @@ function App() {
     fetchSongs();
   }, []);
 
+  // Update the space bar handler to toggle play/pause
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault(); // Prevent page scroll
+        const musicPlayerRef = document.querySelector('.music-player');
+        const playPauseButton = musicPlayerRef?.querySelector('.play-pause-button');
+        if (playPauseButton) {
+          playPauseButton.click();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
   const fetchSongs = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/api/music`);

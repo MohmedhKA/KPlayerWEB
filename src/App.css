@@ -4,21 +4,48 @@
   display: flex;
   flex-direction: column;
   background-color: #121212;
+  background-image: url('/home/shin_chan/musicServer/frontend/src/assets/vivek-doshi-FFUoLIjamFY-unsplash.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: white;
   overflow-x: hidden; /* For tab transitions */
 }
 
+/* Add a dark overlay to improve readability */
+.app::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(18, 18, 18, 0.85); /* Semi-transparent dark overlay */
+  z-index: 0;
+}
+
+/* Ensure content stays above the overlay */
+.app > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fixed Header with Cool Styling */
 .app-header {
-  background-color: #282828;
+  background: linear-gradient(45deg, #282828, #1e1e1e); /* Cool gradient background */
   padding: 0.75rem 1.5rem;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 2rem;
-  position: sticky;
+  position: fixed; /* Changed from sticky to fixed */
   top: 0;
+  left: 0;
+  width: 100%;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border-bottom: 2px solid #1db954; /* Accent border */
 }
 
 .app-title {
@@ -104,11 +131,13 @@
   transform: scale(1.02);
 }
 
+/* Adjust main content to account for the fixed header */
 .app-main {
   flex: 1;
   position: relative;
   padding: 1rem 1.5rem;
   padding-bottom: 6rem;
+  margin-top: 70px; /* Adjust this value if needed */
 }
 
 /* Tab container and transitions */

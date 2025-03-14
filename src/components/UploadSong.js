@@ -1,53 +1,36 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
+import { FaTimes, FaCloudUploadAlt, FaMusic } from 'react-icons/fa';
 import './UploadSong.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 
-const UploadSong = ({ onUploadComplete, onClose }) => {
-  const [isDragging, setIsDragging] = useState(false);
+const UploadSong = ({ onClose, onUploadComplete }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [emotion, setEmotion] = useState('');
-  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
-  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-  const emotions = ['Joy', 'Sad', 'Anger', 'Excitement', 'Surprise'];
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('audio/')) {
-      setSelectedFile(file);
+  const onDrop = useCallback((acceptedFiles) => {
+    if (acceptedFiles.length > 0) {
+      setSelectedFile(acceptedFiles[0]);
       setError('');
-    } else {
-      setError('Please select an audio file');
     }
-  };
+  }, []);
 
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type.startsWith('audio/')) {
-      setSelectedFile(file);
-      setError('');
-    } else {
-      setError('Please select an audio file');
-    }
-  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'audio/mpeg': ['.mp3'],
+      'audio/mp3': ['.mp3']
+    },
+    multiple: false
+  });
 
-  const handleUpload = async () => {
+  const handleUpload = async (e) => {
+    e.preventDefault();
     if (!selectedFile || !emotion) {
       setError('Please select a file and emotion');
       return;
@@ -64,20 +47,22 @@ const UploadSong = ({ onUploadComplete, onClose }) => {
       const response = await axios.post(`${BASE_URL}/api/music/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent) => {
+          const progress = (progressEvent.loaded / progressEvent.total) * 100;
+          setUploadProgress(progress);
         }
       });
 
       if (response.data.success) {
         onUploadComplete(response.data.data);
         onClose();
+      } else {
+        setError(response.data.message || 'Upload failed');
       }
     } catch (error) {
-      if (error.response?.status === 409) {
-        setError('This song already exists in the library');
-      } else {
-        setError('Error uploading song. Please try again.');
-      }
-      console.error('Upload error:', error);
+      console.error('Error uploading:', error);
+      setError(error.response?.data?.message || 'Upload failed');
     } finally {
       setUploading(false);
     }
@@ -85,67 +70,74 @@ const UploadSong = ({ onUploadComplete, onClose }) => {
 
   return (
     <div className="upload-overlay">
-      <div className="upload-modal">
-        <button className="close-button" onClick={onClose}>×</button>
-        
-        <div
-          className={`drop-zone ${isDragging ? 'dragging' : ''}`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current.click()}
-        >
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileSelect}
-            accept="audio/*"
-            style={{ display: 'none' }}
-          />
-          {selectedFile ? (
-            <div className="selected-file">
-              <span className="file-name">{selectedFile.name}</span>
-              <button 
-                className="remove-file"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedFile(null);
-                }}
-              >
-                ×
-              </button>
+      <div className="upload-container">
+        <div className="upload-header">
+          <h2 className="upload-title">
+            <FaMusic /> Add New Song
+          </h2>
+          <button className="close-button" onClick={onClose}>
+            <FaTimes />
+          </button>
+        </div>
+
+        <form onSubmit={handleUpload} className="upload-form">
+          <div
+            {...getRootProps()}
+            className={`upload-dropzone ${isDragActive ? 'dragging' : ''}`}
+          >
+            <input {...getInputProps()} />
+            <FaCloudUploadAlt className="upload-icon" />
+            <div className="upload-text">
+              {selectedFile ? (
+                <>🎵 Selected: {selectedFile.name}</>
+              ) : isDragActive ? (
+                <>✨ Drop your song here!</>
+              ) : (
+                <>
+                  🎵 Drag & drop your song here
+                  <br />
+                  <span className="upload-subtext">or click to browse</span>
+                </>
+              )}
             </div>
-          ) : (
-            <div className="drop-text">
-              <p>Drag & drop your song here</p>
-              <p>or click to select</p>
+          </div>
+
+          <select
+            className="emotion-select"
+            value={emotion}
+            onChange={(e) => setEmotion(e.target.value)}
+          >
+            <option value="">Select emotion 🎭</option>
+            <option value="Joy">Joy 😊</option>
+            <option value="Sad">Sad 😢</option>
+            <option value="Excitement">Excitement ⚡</option>
+            <option value="Surprise">Surprise 🤩</option>
+            <option value="Anger">Anger 😠</option>
+          </select>
+
+          {error && <div className="error-message">❌ {error}</div>}
+
+          {uploading && (
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{ width: `${uploadProgress}%` }}
+              />
             </div>
           )}
-        </div>
 
-        <div className="emotion-selector">
-          <label>Select Emotion:</label>
-          <select 
-            value={emotion} 
-            onChange={(e) => setEmotion(e.target.value)}
-            className="emotion-select"
+          <button
+            type="submit"
+            className="upload-button"
+            disabled={!selectedFile || !emotion || uploading}
           >
-            <option value="">Choose emotion...</option>
-            {emotions.map(e => (
-              <option key={e} value={e}>{e}</option>
-            ))}
-          </select>
-        </div>
-
-        {error && <div className="error-message">{error}</div>}
-
-        <button
-          className="upload-button"
-          onClick={handleUpload}
-          disabled={!selectedFile || !emotion || uploading}
-        >
-          {uploading ? 'Uploading...' : 'Upload Song'}
-        </button>
+            {uploading ? (
+              <>📤 Uploading... {Math.round(uploadProgress)}%</>
+            ) : (
+              <>🚀 Upload Song</>
+            )}
+          </button>
+        </form>
       </div>
     </div>
   );

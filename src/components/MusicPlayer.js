@@ -134,7 +134,13 @@ const MusicPlayer = ({ currentSong, playlist, onNext, onPrevious }) => {
         clearTimeout(seekTimeout.current);
       }
     };
-  }, [currentSong, volume, onNext, startProgressInterval, stopProgressInterval, updateTimeAndProgress]);
+  }, [currentSong, startProgressInterval, stopProgressInterval, updateTimeAndProgress]);
+
+  useEffect(() => {
+    if (soundRef.current) {
+      soundRef.current.volume(volume);
+    }
+  }, [volume]);
 
   const handlePlayPause = () => {
     if (!soundRef.current || isLoading) return;

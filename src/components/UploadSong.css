@@ -4,154 +4,157 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
-.upload-modal {
-  background: #1a1a1a;
+.upload-container {
+  background: #1e1e1e;
   border-radius: 12px;
-  padding: 24px;
+  padding: 2rem;
   width: 90%;
   max-width: 500px;
-  position: relative;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.upload-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .close-button {
-  position: absolute;
-  top: 12px;
-  right: 12px;
   background: none;
   border: none;
-  color: #fff;
-  font-size: 24px;
+  color: #888;
+  font-size: 1.5rem;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 50%;
-  transition: background-color 0.2s;
+  padding: 0.5rem;
+  transition: color 0.2s;
 }
 
 .close-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
-.drop-zone {
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.upload-dropzone {
   border: 2px dashed #444;
   border-radius: 8px;
-  padding: 32px;
+  padding: 2rem;
   text-align: center;
   cursor: pointer;
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-  background: #222;
-}
-
-.drop-zone.dragging {
-  border-color: #1db954;
-  background: rgba(29, 185, 84, 0.1);
-}
-
-.drop-zone:hover {
-  border-color: #666;
+  transition: all 0.2s;
   background: #2a2a2a;
 }
 
-.drop-text {
-  color: #888;
-}
-
-.drop-text p {
-  margin: 4px 0;
-}
-
-.selected-file {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.upload-dropzone:hover {
+  border-color: #666;
   background: #333;
-  padding: 8px 12px;
-  border-radius: 6px;
-  color: #fff;
 }
 
-.file-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin-right: 12px;
+.upload-dropzone.dragging {
+  border-color: #007bff;
+  background: rgba(0, 123, 255, 0.1);
 }
 
-.remove-file {
-  background: none;
-  border: none;
-  color: #ff4444;
-  cursor: pointer;
-  font-size: 18px;
-  padding: 4px 8px;
-  border-radius: 50%;
-  transition: background-color 0.2s;
+.upload-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #666;
 }
 
-.remove-file:hover {
-  background-color: rgba(255, 68, 68, 0.1);
+.upload-text {
+  color: #888;
+  margin-bottom: 0.5rem;
 }
 
-.emotion-selector {
-  margin-bottom: 20px;
-}
-
-.emotion-selector label {
-  display: block;
-  margin-bottom: 8px;
-  color: #fff;
+.upload-subtext {
+  color: #666;
+  font-size: 0.9rem;
 }
 
 .emotion-select {
-  width: 100%;
-  padding: 10px;
+  padding: 0.75rem;
   border-radius: 6px;
-  background: #333;
+  background: #2a2a2a;
   border: 1px solid #444;
   color: #fff;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.emotion-select:focus {
-  outline: none;
-  border-color: #1db954;
-}
-
-.error-message {
-  color: #ff4444;
-  margin-bottom: 16px;
-  padding: 8px;
-  background: rgba(255, 68, 68, 0.1);
-  border-radius: 4px;
+  width: 100%;
+  margin-top: 1rem;
 }
 
 .upload-button {
-  width: 100%;
-  padding: 12px;
-  background: #1db954;
+  background: #007bff;
+  color: #fff;
   border: none;
+  padding: 0.75rem;
   border-radius: 6px;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s;
+  font-weight: 600;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
-.upload-button:hover:not(:disabled) {
-  background: #1ed760;
+.upload-button:hover {
+  background: #0056b3;
 }
 
 .upload-button:disabled {
   background: #444;
   cursor: not-allowed;
+}
+
+.progress-bar {
+  height: 4px;
+  background: #2a2a2a;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #007bff;
+  transition: width 0.3s ease;
+}
+
+.error-message {
+  color: #ff4444;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
 } 
