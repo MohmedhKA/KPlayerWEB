@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
-import { FaTimes, FaCloudUploadAlt, FaMusic } from 'react-icons/fa';
+import { FaTimes, FaCloudUploadAlt, FaMusic } from 'react-icons/fa';  // Make sure these are installed
 import './UploadSong.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
@@ -143,4 +143,4 @@ const UploadSong = ({ onClose, onUploadComplete }) => {
   );
 };
 
-export default UploadSong; 
+export default UploadSong;

@@ -40,6 +40,10 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
+  useEffect(() => {
+    console.log('showUpload state changed:', showUpload);
+  }, [showUpload]);
+
   const fetchSongs = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/api/music`);
@@ -178,11 +182,31 @@ function App() {
 
       <button 
         className="upload-fab"
-        onClick={() => setShowUpload(true)}
+        onClick={() => {
+          console.log('FAB clicked');
+          setShowUpload(true);
+        }}
         aria-label="Upload song"
       >
         +
       </button>
+
+      {showUpload && (
+        <div 
+          onClick={(e) => {
+            console.log('Overlay clicked');
+            e.stopPropagation();
+          }}
+        >
+          <UploadSong
+            onUploadComplete={handleUploadComplete}
+            onClose={() => {
+              console.log('Close triggered');
+              setShowUpload(false);
+            }}
+          />
+        </div>
+      )}
 
       {showUpload && (
         <UploadSong
@@ -194,4 +218,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;

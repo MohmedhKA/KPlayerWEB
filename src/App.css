@@ -409,7 +409,7 @@
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3);
   transition: all 0.3s ease;
-  z-index: 100;
+  z-index: 1100; /* Increased z-index */
 }
 
 .upload-fab:hover {
@@ -420,4 +420,4 @@
 
 .upload-fab:active {
   transform: scale(0.95);
-} 
+}

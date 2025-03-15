@@ -9,7 +9,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 9999; /* Increased z-index */
+  pointer-events: auto; /* Ensure clicks are captured */
 }
 
 .upload-container {
@@ -20,6 +21,10 @@
   max-width: 500px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease-out;
+  position: relative;
+  z-index: 10000; /* Increased z-index */
+  pointer-events: auto;
+  isolation: isolate; /* Create new stacking context */
 }
 
 @keyframes slideUp {
@@ -157,4 +162,4 @@
   color: #ff4444;
   margin-top: 0.5rem;
   font-size: 0.9rem;
-} 
+}
