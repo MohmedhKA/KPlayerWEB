@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaPlay, FaPause, FaTrash } from 'react-icons/fa';
+import { FaShuffle } from 'react-icons/fa6';
 import './PlaylistView.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
@@ -170,6 +171,18 @@ const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {
           <h2>{selectedPlaylist.name} Playlist</h2>
           <p>{songs.length} songs</p>
         </div>
+        <div className="shuffle-container">
+          <button 
+            className="shuffle-button"
+            onClick={() => {
+              const shuffledSongs = [...songs].sort(() => Math.random() - 0.5);
+              onSongSelect(shuffledSongs[0], shuffledSongs);
+            }}
+          >
+            <FaShuffle />
+            <span>Shuffle Playlist</span>
+          </button>
+        </div>
         <div className="playlist-songs">
           {songs.map((song, index) => (
             <div 
@@ -277,4 +290,4 @@ const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {
   );
 };
 
-export default PlaylistView; 
+export default PlaylistView;

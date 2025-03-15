@@ -148,14 +148,11 @@
 }
 
 .tab-content {
-  width: 100%;
   position: absolute;
-  top: 0;
-  left: 0;
+  width: 100%;
   opacity: 0;
-  pointer-events: none;
-  transform: translateX(100%);
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
 }
 
 .tab-content.active {
@@ -176,6 +173,37 @@
 .tab-container.left .tab-content.active,
 .tab-container.right .tab-content.active {
   transform: translateX(0);
+}
+
+/* Home tab animations */
+.tab-content[data-tab="home"] {
+  transform: translateX(-30px);
+}
+
+.tab-content[data-tab="home"].active {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Playlist tab animations */
+.tab-content[data-tab="playlists"] {
+  transform: translateX(30px);
+}
+
+.tab-content[data-tab="playlists"].active {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Expression tab animations */
+.tab-content[data-tab="expression"] {
+  transform: translateY(30px);
+  opacity: 0;
+}
+
+.tab-content[data-tab="expression"].active {
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .app-footer {
@@ -368,28 +396,47 @@
   transition: width 0.1s linear;
 }
 
-/* Tab transition animations */
-.tab-content {
-  position: absolute;
-  width: 100%;
-  left: 0;
-  transition: transform 0.3s ease-in-out;
+/* Expression options animation */
+.expression-options {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+  height: calc(100vh - 200px);
 }
 
-.tab-content.entering {
-  transform: translateX(100%);
+.expression-option {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUpIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.tab-content.entered {
-  transform: translateX(0);
+.expression-option.weather {
+  animation-delay: 0.2s;
 }
 
-.tab-content.exiting {
-  transform: translateX(-100%);
+.expression-option.facial {
+  animation-delay: 0.4s;
 }
 
+@keyframes fadeUpIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Remove the old transition classes */
+.tab-content.entering,
+.tab-content.entered,
+.tab-content.exiting,
 .tab-content.exited {
-  transform: translateX(-100%);
+  display: none;
 }
 
 .upload-fab {
@@ -420,4 +467,82 @@
 
 .upload-fab:active {
   transform: scale(0.95);
+}
+
+.expression-options {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+  height: calc(100vh - 200px);
+}
+
+.expression-option {
+  width: 300px;
+  height: 300px;
+  border-radius: 12px;
+  background: #282828;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.expression-option:hover {
+  transform: translateY(-5px);
+  background: #333;
+}
+
+.expression-option img {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+}
+
+.expression-option span {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.expression-option.weather {
+  background: linear-gradient(135deg, #21b03b, #6dd5ed);
+}
+
+.expression-option.facial {
+  background: linear-gradient(30deg, #6dd5ed,#21b03b);
+}
+
+.facial-detection-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.close-detection {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.close-detection:hover {
+  color: #1db954;
 }

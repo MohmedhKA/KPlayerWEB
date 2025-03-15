@@ -5,7 +5,11 @@ import SongList from './components/SongList';
 import MusicPlayer from './components/MusicPlayer';
 import PlaylistView from './components/PlaylistView';
 import UploadSong from './components/UploadSong';
+import FacialDetection from './components/FacialDetection';
+import WeatherDetection from './components/WeatherDetection';
 import './App.css';
+import weatherIcon from './assets/weather.png';
+import faceIcon from './assets/face.png';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -18,6 +22,10 @@ function App() {
   const [currentPlaylist, setCurrentPlaylist] = useState(null);
   const [slideDirection, setSlideDirection] = useState('right');
   const [showUpload, setShowUpload] = useState(false);
+  const [showFacialDetection, setShowFacialDetection] = useState(false);
+  const [isShuffled, setIsShuffled] = useState(false);
+  const [isShuffleMode, setIsShuffleMode] = useState(false);
+  const [showWeatherDetection, setShowWeatherDetection] = useState(false);
 
   useEffect(() => {
     fetchSongs();
@@ -56,25 +64,47 @@ function App() {
     }
   };
 
-  const handleSongSelect = (song) => {
+  const handleSongSelect = (song, shuffledList = null) => {
     const { audioUrl, ...songWithoutAudioUrl } = song;
     let newIndex;
-    if (currentPlaylist) {
+    
+    if (shuffledList) {
+      setDisplayedSongs(shuffledList);
+      newIndex = shuffledList.findIndex(s => s.id === song.id);
+    } else if (currentPlaylist) {
       newIndex = displayedSongs.findIndex(s => s.id === song.id);
     } else {
       newIndex = allSongs.findIndex(s => s.id === song.id);
     }
+    
     setCurrentIndex(newIndex);
     setCurrentSong(songWithoutAudioUrl);
   };
 
+  // Update the handleNext function to properly handle shuffle
   const handleNext = () => {
-    const songs = currentPlaylist ? displayedSongs : allSongs;
-    if (currentIndex < songs.length - 1) {
-      const nextIndex = currentIndex + 1;
-      setCurrentIndex(nextIndex);
-      setCurrentSong(songs[nextIndex]);
+    if (!displayedSongs.length) return;
+    
+    let nextIndex;
+    if (isShuffleMode) {
+      // Get random index excluding current song
+      let possibleIndices = Array.from(
+        { length: displayedSongs.length }, 
+        (_, i) => i
+      ).filter(i => i !== currentIndex);
+      
+      if (possibleIndices.length === 0) {
+        nextIndex = 0; // Reset to start if no other songs
+      } else {
+        nextIndex = possibleIndices[Math.floor(Math.random() * possibleIndices.length)];
+      }
+    } else {
+      nextIndex = (currentIndex + 1) % displayedSongs.length;
     }
+  
+    const nextSong = displayedSongs[nextIndex];
+    setCurrentIndex(nextIndex);
+    setCurrentSong(nextSong);
   };
 
   const handlePrevious = () => {
@@ -124,6 +154,26 @@ function App() {
     }
   };
 
+  const handleEmotionDetected = (emotion) => {
+    const filteredSongs = allSongs.filter(song => song.emotion === emotion);
+    setDisplayedSongs(filteredSongs);
+    setShowFacialDetection(false);
+    setActiveTab('home');
+  };
+
+  const handleWeatherEmotion = (emotion) => {
+    const filteredSongs = allSongs.filter(song => song.emotion === emotion);
+    setDisplayedSongs(filteredSongs);
+    setShowWeatherDetection(false);
+    setActiveTab('home');
+  };
+
+  // Add console log to debug shuffle mode toggle
+  const toggleShuffleMode = () => {
+    console.log('Toggling shuffle mode:', !isShuffleMode);
+    setIsShuffleMode(!isShuffleMode);
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -140,6 +190,12 @@ function App() {
             Home
           </button>
           <button
+            className={`tab-button ${activeTab === 'expression' ? 'active' : ''}`}
+            onClick={() => handleTabChange('expression')}
+          >
+            Expression
+          </button>
+          <button
             className={`tab-button ${activeTab === 'playlists' ? 'active' : ''}`}
             onClick={() => handleTabChange('playlists')}
           >
@@ -153,15 +209,42 @@ function App() {
       </header>
 
       <main className="app-main">
-        <div className={`tab-container ${slideDirection}`}>
-          <div className={`tab-content ${activeTab === 'home' ? 'active' : ''}`}>
+        <div className="tab-container">
+          <div 
+            className={`tab-content ${activeTab === 'home' ? 'active' : ''}`}
+            data-tab="home"
+          >
             <SongList
               songs={displayedSongs}
               currentSong={currentSong}
-              onSongSelect={handleSongSelect}
+              onSongSelect={(song, shuffledList) => handleSongSelect(song, shuffledList)}
             />
           </div>
-          <div className={`tab-content ${activeTab === 'playlists' ? 'active' : ''}`}>
+          <div 
+            className={`tab-content ${activeTab === 'expression' ? 'active' : ''}`}
+            data-tab="expression"
+          >
+            <div className="expression-options">
+              <button 
+                className="expression-option weather"
+                onClick={() => setShowWeatherDetection(true)}
+              >
+                <img src={weatherIcon} alt="Weather" />
+                <span>Weather</span>
+              </button>
+              <button 
+                className="expression-option facial"
+                onClick={() => setShowFacialDetection(true)}
+              >
+                <img src={faceIcon} alt="Facial Detection" />
+                <span>Facial Detection</span>
+              </button>
+            </div>
+          </div>
+          <div 
+            className={`tab-content ${activeTab === 'playlists' ? 'active' : ''}`}
+            data-tab="playlists"
+          >
             <PlaylistView 
               onPlaylistSelect={handlePlaylistSelect}
               currentSong={currentSong}
@@ -177,6 +260,8 @@ function App() {
           playlist={displayedSongs}
           onNext={handleNext}
           onPrevious={handlePrevious}
+          isShuffleMode={isShuffleMode}
+          onShuffleToggle={toggleShuffleMode}
         />
       </footer>
 
@@ -192,26 +277,30 @@ function App() {
       </button>
 
       {showUpload && (
-        <div 
-          onClick={(e) => {
-            console.log('Overlay clicked');
-            e.stopPropagation();
-          }}
-        >
+        <div onClick={(e) => e.stopPropagation()}>
           <UploadSong
             onUploadComplete={handleUploadComplete}
-            onClose={() => {
-              console.log('Close triggered');
-              setShowUpload(false);
-            }}
+            onClose={() => setShowUpload(false)}
           />
         </div>
       )}
 
-      {showUpload && (
-        <UploadSong
-          onUploadComplete={handleUploadComplete}
-          onClose={() => setShowUpload(false)}
+      {showFacialDetection && (
+        <div className="facial-detection-overlay">
+          <FacialDetection onEmotionDetected={handleEmotionDetected} />
+          <button 
+            className="close-detection"
+            onClick={() => setShowFacialDetection(false)}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {showWeatherDetection && (
+        <WeatherDetection 
+          onEmotionDetected={handleWeatherEmotion}
+          onClose={() => setShowWeatherDetection(false)}
         />
       )}
     </div>

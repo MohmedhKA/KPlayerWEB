@@ -1,0 +1,179 @@
+.weather-detection {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.weather-content {
+  text-align: center;
+  color: white;
+  animation: weatherFadeIn 1s ease-out forwards;
+}
+
+.weather-condition {
+  font-size: 4rem;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: weatherSlideUp 0.6s ease-out 0.2s forwards;
+}
+
+.weather-description {
+  font-size: 1.5rem;
+  margin: 1rem 0;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: weatherSlideUp 0.6s ease-out 0.4s forwards;
+}
+
+.weather-temperature {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 1rem 0;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: weatherSlideUp 0.6s ease-out 0.6s forwards;
+}
+
+.weather-location {
+  font-size: 1.2rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: weatherSlideUp 0.6s ease-out 0.8s forwards;
+}
+
+.weather-loading {
+  text-align: center;
+  color: white;
+}
+
+.weather-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #1db954;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.weather-error {
+  color: white;
+  text-align: center;
+  padding: 2rem;
+}
+
+.weather-error button {
+  background: #1db954;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.weather-error button:hover {
+  background: #1ed760;
+}
+
+.close-weather {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 1000;
+}
+
+.close-weather:hover {
+  color: #1db954;
+}
+
+.weather-error-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.weather-error-actions button {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.retry-button {
+  background: #1db954;
+  color: white;
+}
+
+.retry-button:hover {
+  background: #1ed760;
+}
+
+.settings-button {
+  background: #333;
+  color: white;
+}
+
+.settings-button:hover {
+  background: #444;
+}
+
+.weather-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  animation: weatherSlideUp 0.6s ease-out 0.6s forwards;
+  opacity: 0;
+}
+
+.weather-humidity,
+.weather-wind {
+  text-align: center;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes weatherFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes weatherSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

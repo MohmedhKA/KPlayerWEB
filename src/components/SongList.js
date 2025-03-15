@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaPlay, FaTrash } from 'react-icons/fa';
+import { FaShuffle } from 'react-icons/fa6';
 import axios from 'axios';
 import './SongList.css';
 
@@ -48,6 +49,20 @@ const SongList = ({ songs, currentSong, onSongSelect, onSongDeleted }) => {
     }
   };
 
+  const handleShuffle = () => {
+    const shuffledSongs = [...songs]
+      .filter(song => song.id !== currentSong?.id)
+      .sort(() => Math.random() - 0.5);
+    
+    if (currentSong) {
+      // Keep current song playing and put it at the start
+      shuffledSongs.unshift(currentSong);
+    }
+    
+    // Play the first song if none is playing
+    onSongSelect(shuffledSongs[0]);
+  };
+
   const formatDuration = (duration) => {
     const minutes = Math.floor(duration / 60);
     const seconds = Math.floor(duration % 60);
@@ -61,6 +76,14 @@ const SongList = ({ songs, currentSong, onSongSelect, onSongDeleted }) => {
   return (
     <div className="song-list">
       {error && <div className="error-message">{error}</div>}
+      {songs.length > 0 && (
+        <div className="shuffle-container">
+          <button className="shuffle-button" onClick={handleShuffle}>
+            <FaShuffle />
+            <span>Shuffle Play</span>
+          </button>
+        </div>
+      )}
       {songs.map((song, index) => {
         // Ensure thumbnail URL is set
         if (!song.thumbnailUrl) {

@@ -1,13 +1,21 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Howl } from 'howler';
 import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaVolumeUp, FaVolumeMute, FaPlus } from 'react-icons/fa';
+import { FaShuffle } from 'react-icons/fa6';
 import axios from 'axios';
 import PlaylistPopup from './PlaylistPopup';
 import './MusicPlayer.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 
-const MusicPlayer = ({ currentSong, playlist, onNext, onPrevious }) => {
+const MusicPlayer = ({ 
+  currentSong, 
+  playlist, 
+  onNext, 
+  onPrevious, 
+  isShuffleMode, 
+  onShuffleToggle 
+}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -210,7 +218,7 @@ const MusicPlayer = ({ currentSong, playlist, onNext, onPrevious }) => {
 
   return (
     <div className="music-player">
-      <div className="player-left">
+      <div className="now-playing">
         {currentSong && (
           <>
             <img 
@@ -225,20 +233,40 @@ const MusicPlayer = ({ currentSong, playlist, onNext, onPrevious }) => {
           </>
         )}
       </div>
-
+      <div className="controls">
+        <button 
+          className="control-button" 
+          onClick={onPrevious}
+          title="Previous"
+        >
+          <FaStepBackward />
+        </button>
+        <button 
+          className="control-button play-pause" 
+          onClick={handlePlayPause}
+          title={isPlaying ? "Pause" : "Play"}
+        >
+          {isPlaying ? <FaPause /> : <FaPlay />}
+        </button>
+        <button 
+          className="control-button" 
+          onClick={onNext}
+          title="Next"
+        >
+          <FaStepForward />
+        </button>
+        <button 
+          className={`control-button shuffle-button ${isShuffleMode ? 'active' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onShuffleToggle();
+          }}
+          title={`Shuffle ${isShuffleMode ? 'On' : 'Off'}`}
+        >
+          <FaShuffle />
+        </button>
+      </div>
       <div className="player-center">
-        <div className="player-controls">
-          <button onClick={onPrevious} disabled={isLoading}>
-            <FaStepBackward />
-          </button>
-          <button onClick={handlePlayPause} disabled={isLoading} className="play-pause-button">
-            {isPlaying ? <FaPause /> : <FaPlay />}
-          </button>
-          <button onClick={onNext} disabled={isLoading}>
-            <FaStepForward />
-          </button>
-        </div>
-        
         <div className="progress-container">
           <span className="time">{formatTime(currentTime)}</span>
           <div 
@@ -290,4 +318,4 @@ const MusicPlayer = ({ currentSong, playlist, onNext, onPrevious }) => {
   );
 };
 
-export default MusicPlayer; 
+export default MusicPlayer;

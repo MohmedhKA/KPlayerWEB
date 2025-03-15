@@ -205,4 +205,49 @@
 
 .volume-slider:hover::-webkit-slider-thumb {
   opacity: 1;
-} 
+}
+
+.controls .shuffle-button {
+  color: #888;
+  transition: all 0.3s ease;
+}
+
+.controls .shuffle-button.active {
+  color: #1db954;
+  transform: scale(1.1);
+}
+
+.controls .shuffle-button:hover {
+  color: #1db954;
+  transform: scale(1.1);
+}
+
+.controls .shuffle-button.active:hover {
+  color: #1ed760;
+}
+
+.control-button.shuffle-button {
+  color: #888;
+  transition: all 0.3s ease;
+  padding: 8px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.control-button.shuffle-button.active {
+  color: #1db954;
+  background: rgba(29, 185, 84, 0.1);
+  transform: scale(1.1);
+}
+
+.control-button.shuffle-button:hover {
+  color: #1db954;
+  background: rgba(29, 185, 84, 0.1);
+}
+
+.control-button.shuffle-button.active:hover {
+  color: #1ed760;
+  background: rgba(29, 185, 84, 0.2);
+}
