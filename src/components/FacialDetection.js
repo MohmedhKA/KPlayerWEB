@@ -86,7 +86,7 @@ const FacialDetection = ({ onEmotionDetected }) => {
       sad: 'Sad',
       surprised: 'Surprise',
       angry: 'Anger',
-      neutral: 'Excitement' // Mapping neutral to Joy as default
+      neutral: 'Excitement' // Updated display text
     };
 
     let maxExpression = null;

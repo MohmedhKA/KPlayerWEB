@@ -11,16 +11,16 @@ const EMOTION_PLAYLISTS = [
   { id: 'sad', name: 'Sad', emotion: 'Sad', thumbnail: 'Sad_playlist.jpg' },
   { id: 'anger', name: 'Anger', emotion: 'Anger', thumbnail: 'Anger_playlist.jpg' },
   { id: 'joy', name: 'Joy', emotion: 'Joy', thumbnail: 'Joy_playlist.jpg' },
-  { id: 'excitement', name: 'Excitement', emotion: 'Excitement', thumbnail: 'Excitement_playlist.jpg' }
+  { id: 'excitement', name: 'Neutral', emotion: 'Excitement', thumbnail: 'Netural_playlist.jpg' } // Changed display name to Neutral
 ];
 
-// Add this color mapping near the EMOTION_PLAYLISTS constant
+// Update the color mapping
 const EMOTION_COLORS = {
   Surprise: '#E4D00A', // Bright yellow
   Sad: '#4169E1',     // Royal blue
   Anger: '#FF3838',   // Bright red
   Joy: '#50C878',     // Emerald green
-  Excitement: '#FFA500' // Orange
+  Excitement: '#FFFFFF' // White color for Neutral
 };
 
 const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {

@@ -57,14 +57,18 @@ const UploadSong = ({ onClose, onUploadComplete }) => {
       if (response.data.success) {
         onUploadComplete(response.data.data);
         onClose();
-      } else {
-        setError(response.data.message || 'Upload failed');
       }
     } catch (error) {
       console.error('Error uploading:', error);
-      setError(error.response?.data?.message || 'Upload failed');
+      // Handle duplicate song error specifically
+      if (error.response?.status === 409) {
+        setError(`A song with title "${error.response.data.existingSong.title}" already exists`);
+      } else {
+        setError(error.response?.data?.message || 'Upload failed');
+      }
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -110,7 +114,7 @@ const UploadSong = ({ onClose, onUploadComplete }) => {
             <option value="">Select emotion 🎭</option>
             <option value="Joy">Joy 😊</option>
             <option value="Sad">Sad 😢</option>
-            <option value="Excitement">Excitement ⚡</option>
+            <option value="Excitement">Neutral 😑</option>
             <option value="Surprise">Surprise 🤩</option>
             <option value="Anger">Anger 😠</option>
           </select>

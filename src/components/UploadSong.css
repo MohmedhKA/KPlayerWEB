@@ -159,7 +159,19 @@
 }
 
 .error-message {
+  background-color: rgba(255, 0, 0, 0.1);
+  border: 1px solid #ff4444;
   color: #ff4444;
-  margin-top: 0.5rem;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 10px 0;
+  text-align: center;
   font-size: 0.9rem;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
