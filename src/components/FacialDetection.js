@@ -82,24 +82,34 @@ const FacialDetection = ({ onEmotionDetected }) => {
 
   const mapExpression = (expressions) => {
     const emotionMap = {
-      happy: 'Joy',
-      sad: 'Sad',
-      surprised: 'Surprise',
-      angry: 'Anger',
-      neutral: 'Excitement' // Updated display text
+      happy: ['Joy','Excitement'],
+      sad: ['Sad'],
+      surprised: ['Surprise'],
+      angry: ['Anger', 'Sad'],
+      neutral: ['Excitement'] // Keep using Excitement for neutral
     };
 
     let maxExpression = null;
     let maxValue = -1;
 
+    // Find the dominant expression
     Object.entries(expressions).forEach(([expression, value]) => {
       if (emotionMap[expression] && value > maxValue) {
         maxValue = value;
-        maxExpression = emotionMap[expression];
+        maxExpression = expression;
       }
     });
 
-    return maxExpression || 'Joy';
+    // If no valid expression found, return default
+    if (!maxExpression || !emotionMap[maxExpression]) {
+      return 'Joy'; // Default emotion
+    }
+
+    // Randomly select one emotion from the array of possible emotions
+    const possibleEmotions = emotionMap[maxExpression];
+    const randomIndex = Math.floor(Math.random() * possibleEmotions.length);
+    
+    return possibleEmotions[randomIndex];
   };
 
   const analyzeEmotion = async () => {
