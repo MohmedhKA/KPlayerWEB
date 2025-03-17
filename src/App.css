@@ -199,6 +199,10 @@
 .tab-content[data-tab="expression"] {
   transform: translateY(30px);
   opacity: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 200px);
 }
 
 .tab-content[data-tab="expression"].active {
@@ -359,29 +363,6 @@
   color: #b3b3b3;
 }
 
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.controls button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 10px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.controls button:hover {
-  background-color: #404040;
-}
-
 .progress-bar {
   flex: 1;
   height: 4px;
@@ -404,6 +385,9 @@
   gap: 2rem;
   padding: 2rem;
   height: calc(100vh - 200px);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .expression-option {
@@ -476,6 +460,9 @@
   gap: 2rem;
   padding: 2rem;
   height: calc(100vh - 200px);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .expression-option {
@@ -545,4 +532,77 @@
 
 .close-detection:hover {
   color: #1db954;
+}
+
+/* Add these styles to your existing CSS */
+.expression-songs {
+  position: relative;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.expression-songs h2 {
+  color: #1db954;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  text-align: center;
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ensure proper spacing for the song list */
+.expression-songs .song-list {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in-out 0.2s forwards;
+}
+
+.song-recommendation-info {
+  text-align: center;
+  margin: -1rem 0 1.5rem;
+  color: #b3b3b3;
+  font-size: 0.9rem;
+}
+
+.song-recommendation-info p {
+  margin: 0;
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in-out 0.3s forwards;
+}
+
+/* Add these styles to your existing CSS */
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  font-size: 1rem;
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.back-button:hover {
+  color: white;
+  background-color: rgba(29, 185, 84, 0.3);
 }

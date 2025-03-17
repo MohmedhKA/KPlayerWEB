@@ -11,11 +11,12 @@ import './App.css';
 import weatherIcon from './assets/weather.png';
 import faceIcon from './assets/face.png';
 
-const BASE_URL = process.env.REACT_APP_API_URL;
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001'; // Add fallback URL
 
 function App() {
   const [allSongs, setAllSongs] = useState([]);
   const [displayedSongs, setDisplayedSongs] = useState([]);
+  const [recommendedSongs, setRecommendedSongs] = useState([]);
   const [currentSong, setCurrentSong] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [activeTab, setActiveTab] = useState('home');
@@ -23,21 +24,34 @@ function App() {
   const [slideDirection, setSlideDirection] = useState('right');
   const [showUpload, setShowUpload] = useState(false);
   const [showFacialDetection, setShowFacialDetection] = useState(false);
-  const [isShuffled, setIsShuffled] = useState(false);
   const [isShuffleMode, setIsShuffleMode] = useState(false);
   const [showWeatherDetection, setShowWeatherDetection] = useState(false);
+  const [homeSongs, setHomeSongs] = useState([]); // Add this new state
 
   useEffect(() => {
+    const fetchSongs = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/api/music`); // Update endpoint path
+        if (response.data.success) {
+          const songs = response.data.data;
+          setAllSongs(songs);
+          setHomeSongs(songs);  // Set home songs
+          setDisplayedSongs(songs);
+        }
+      } catch (error) {
+        console.error('Error fetching songs:', error);
+      }
+    };
+
     fetchSongs();
   }, []);
 
-  // Update the space bar handler to toggle play/pause
+  // Modify the space bar handler in useEffect
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
         e.preventDefault(); // Prevent page scroll
-        const musicPlayerRef = document.querySelector('.music-player');
-        const playPauseButton = musicPlayerRef?.querySelector('.play-pause-button');
+        const playPauseButton = document.querySelector('.play-pause');
         if (playPauseButton) {
           playPauseButton.click();
         }
@@ -52,30 +66,10 @@ function App() {
     console.log('showUpload state changed:', showUpload);
   }, [showUpload]);
 
-  const fetchSongs = async () => {
-    try {
-      const response = await axios.get(`${BASE_URL}/api/music`);
-      if (response.data.success) {
-        setAllSongs(response.data.data);
-        setDisplayedSongs(response.data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching songs:', error);
-    }
-  };
-
-  const handleSongSelect = (song, shuffledList = null) => {
+  // Update the handleSongSelect function
+  const handleSongSelect = (song, shuffledList = null, enableShuffle = false) => {
     const { audioUrl, ...songWithoutAudioUrl } = song;
-    let newIndex;
-    
-    if (shuffledList) {
-      setDisplayedSongs(shuffledList);
-      newIndex = shuffledList.findIndex(s => s.id === song.id);
-    } else if (currentPlaylist) {
-      newIndex = displayedSongs.findIndex(s => s.id === song.id);
-    } else {
-      newIndex = allSongs.findIndex(s => s.id === song.id);
-    }
+    let newIndex = allSongs.findIndex(s => s.id === song.id);
     
     setCurrentIndex(newIndex);
     setCurrentSong(songWithoutAudioUrl);
@@ -117,8 +111,11 @@ function App() {
   };
 
   const handleSearchResults = (results) => {
+    if (activeTab === 'home') {
+      setHomeSongs(results);
+    }
     setDisplayedSongs(results);
-    setCurrentPlaylist(null);
+    // Don't modify recommendedSongs here
   };
 
   const handlePlaylistSelect = (playlistSongs) => {
@@ -131,47 +128,65 @@ function App() {
     }
   };
 
+  // Update the handleTabChange function
   const handleTabChange = (tab) => {
-    if (tab !== activeTab) {
-      setSlideDirection(tab === 'playlists' ? 'left' : 'right');
-      setActiveTab(tab);
-      if (tab === 'home') {
-        setDisplayedSongs(allSongs);
-        setCurrentPlaylist(null);
-        
-        if (currentSong) {
-          const newIndex = allSongs.findIndex(s => s.id === currentSong.id);
-          setCurrentIndex(newIndex >= 0 ? newIndex : -1);
-        }
-      }
+    // Set slide direction based on current and new tab
+    const currentIndex = ['home', 'playlists', 'expression'].indexOf(activeTab);
+    const newIndex = ['home', 'playlists', 'expression'].indexOf(tab);
+    setSlideDirection(newIndex > currentIndex ? 'right' : 'left');
+    
+    // Restore home songs when switching to home tab
+    if (tab === 'home') {
+      setDisplayedSongs(homeSongs);
+    }
+    
+    // Set the new active tab
+    setActiveTab(tab);
+    
+    // Reset scroll position of app-main
+    const mainContent = document.querySelector('.app-main');
+    if (mainContent) {
+      mainContent.scrollTo({
+        top: 0,
+        behavior: 'instant' // Use 'smooth' for animated scroll
+      });
     }
   };
 
   const handleUploadComplete = (newSong) => {
     setAllSongs(prev => [...prev, newSong]);
-    if (!currentPlaylist) {
+    setHomeSongs(prev => [...prev, newSong]); // Add to home songs
+    if (!currentPlaylist && activeTab === 'home') {
       setDisplayedSongs(prev => [...prev, newSong]);
     }
   };
 
+  // First, modify the handleEmotionDetected function:
   const handleEmotionDetected = (emotion) => {
     const filteredSongs = allSongs.filter(song => song.emotion === emotion);
-    setDisplayedSongs(filteredSongs);
+    setRecommendedSongs(filteredSongs);
+    setDisplayedSongs(filteredSongs); // Add this line
     setShowFacialDetection(false);
-    setActiveTab('home');
   };
 
+  // Remove the setActiveTab('home') call from handleWeatherEmotion
   const handleWeatherEmotion = (emotion) => {
     const filteredSongs = allSongs.filter(song => song.emotion === emotion);
-    setDisplayedSongs(filteredSongs);
+    setRecommendedSongs(filteredSongs);
+    setDisplayedSongs(filteredSongs); // Add this line
     setShowWeatherDetection(false);
-    setActiveTab('home');
   };
 
   // Add console log to debug shuffle mode toggle
   const toggleShuffleMode = () => {
     console.log('Toggling shuffle mode:', !isShuffleMode);
     setIsShuffleMode(!isShuffleMode);
+  };
+
+  // Add this new function after other handler functions
+  const handleBackToExpressionOptions = () => {
+    setRecommendedSongs([]);
+    setDisplayedSongs(homeSongs);
   };
 
   return (
@@ -210,36 +225,65 @@ function App() {
 
       <main className="app-main">
         <div className="tab-container">
+          {/* Home tab - shows all songs */}
           <div 
             className={`tab-content ${activeTab === 'home' ? 'active' : ''}`}
             data-tab="home"
           >
             <SongList
-              songs={displayedSongs}
+              songs={homeSongs}
               currentSong={currentSong}
               onSongSelect={(song, shuffledList) => handleSongSelect(song, shuffledList)}
             />
           </div>
+
+          {/* Expression tab - shows recommended songs */}
           <div 
             className={`tab-content ${activeTab === 'expression' ? 'active' : ''}`}
             data-tab="expression"
           >
-            <div className="expression-options">
-              <button 
-                className="expression-option weather"
-                onClick={() => setShowWeatherDetection(true)}
-              >
-                <img src={weatherIcon} alt="Weather" />
-                <span>Weather</span>
-              </button>
-              <button 
-                className="expression-option facial"
-                onClick={() => setShowFacialDetection(true)}
-              >
-                <img src={faceIcon} alt="Facial Detection" />
-                <span>Facial Detection</span>
-              </button>
-            </div>
+            {!showFacialDetection && !showWeatherDetection ? (
+              <>
+                {recommendedSongs.length > 0 ? (
+                  <div className="expression-songs">
+                    <button 
+                      className="back-button"
+                      onClick={handleBackToExpressionOptions}
+                    >
+                      ← Back
+                    </button>
+                    <h2>Recommended Songs</h2>
+                    <div className="song-recommendation-info">
+                      <p>Based on your mood</p>
+                    </div>
+                    <SongList
+                      songs={recommendedSongs}
+                      currentSong={currentSong}
+                      onSongSelect={(song, shuffledList) => handleSongSelect(song, shuffledList)}
+                    />
+                  </div>
+                ) : (
+                  <div className="expression-options">
+                    <button 
+                      className="expression-option weather"
+                      onClick={() => setShowWeatherDetection(true)}
+                    >
+                      <img src={weatherIcon} alt="Weather" />
+                      <span>Weather</span>
+                    </button>
+                    <button 
+                      className="expression-option facial"
+                      onClick={() => setShowFacialDetection(true)}
+                    >
+                      <img src={faceIcon} alt="Facial Detection" />
+                      <span>Facial Detection</span>
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : null}
+            
+            {/* Rest of the expression tab content... */}
           </div>
           <div 
             className={`tab-content ${activeTab === 'playlists' ? 'active' : ''}`}

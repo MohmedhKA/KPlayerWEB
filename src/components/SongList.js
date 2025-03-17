@@ -6,7 +6,7 @@ import './SongList.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 
-const SongList = ({ songs, currentSong, onSongSelect, onSongDeleted }) => {
+const SongList = ({ songs, currentSong, onSongSelect, onSongDeleted, onShuffleToggle }) => {
   const [error, setError] = useState('');
   const [deletingId, setDeletingId] = useState(null);
 
@@ -50,17 +50,13 @@ const SongList = ({ songs, currentSong, onSongSelect, onSongDeleted }) => {
   };
 
   const handleShuffle = () => {
-    const shuffledSongs = [...songs]
-      .filter(song => song.id !== currentSong?.id)
-      .sort(() => Math.random() - 0.5);
+    // Don't modify the song order in home page
+    const shuffledSongs = [...songs].sort(() => Math.random() - 0.5);
     
-    if (currentSong) {
-      // Keep current song playing and put it at the start
-      shuffledSongs.unshift(currentSong);
+    // Play the first song without affecting the original list
+    if (shuffledSongs.length > 0) {
+      onSongSelect(shuffledSongs[0]);
     }
-    
-    // Play the first song if none is playing
-    onSongSelect(shuffledSongs[0]);
   };
 
   const formatDuration = (duration) => {

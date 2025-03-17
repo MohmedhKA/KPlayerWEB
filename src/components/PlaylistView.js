@@ -14,6 +14,15 @@ const EMOTION_PLAYLISTS = [
   { id: 'excitement', name: 'Excitement', emotion: 'Excitement', thumbnail: 'Excitement_playlist.jpg' }
 ];
 
+// Add this color mapping near the EMOTION_PLAYLISTS constant
+const EMOTION_COLORS = {
+  Surprise: '#E4D00A', // Bright yellow
+  Sad: '#4169E1',     // Royal blue
+  Anger: '#FF3838',   // Bright red
+  Joy: '#50C878',     // Emerald green
+  Excitement: '#FFA500' // Orange
+};
+
 const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [playlistSongs, setPlaylistSongs] = useState({});
@@ -162,26 +171,36 @@ const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {
 
   if (showSongs && selectedPlaylist) {
     const songs = playlistSongs[selectedPlaylist.id] || [];
+    const emotionColor = selectedPlaylist.emotion ? EMOTION_COLORS[selectedPlaylist.emotion] : '#1db954';
+    
     return (
       <div className="playlist-view">
-        <div className="playlist-header">
+        <div 
+          className="playlist-header"
+          style={{
+            background: `linear-gradient(180deg, ${emotionColor}22 0%, transparent 100%)`
+          }}
+        >
           <button className="back-button" onClick={handleBackClick}>
-            ← Back to Playlists
+            <span className="back-icon">←</span>
+            <span className="back-text">Back</span>
           </button>
-          <h2>{selectedPlaylist.name} Playlist</h2>
-          <p>{songs.length} songs</p>
-        </div>
-        <div className="shuffle-container">
-          <button 
-            className="shuffle-button"
-            onClick={() => {
-              const shuffledSongs = [...songs].sort(() => Math.random() - 0.5);
-              onSongSelect(shuffledSongs[0], shuffledSongs);
-            }}
-          >
-            <FaShuffle />
-            <span>Shuffle Playlist</span>
-          </button>
+          <div className="playlist-title-wrapper">
+            <h2 style={{ color: emotionColor, marginRight: '2rem' }}>{selectedPlaylist.name}</h2>
+            <div className="playlist-stats">
+              <span className="song-count">{songs.length} songs</span>
+              <button 
+                className="shuffle-all-button"
+                onClick={() => {
+                  const shuffledSongs = [...songs].sort(() => Math.random() - 0.5);
+                  onSongSelect(shuffledSongs[0], shuffledSongs);
+                }}
+              >
+                <FaShuffle />
+                <span>Shuffle All</span>
+              </button>
+            </div>
+          </div>
         </div>
         <div className="playlist-songs">
           {songs.map((song, index) => (

@@ -87,10 +87,63 @@
 
 /* New styles for playlist songs view */
 .playlist-header {
+  position: relative;
   display: flex;
   align-items: center;
   margin-bottom: 2rem;
   gap: 1rem;
+  padding: 2rem;
+  margin: -1rem -1rem 2rem -1rem;
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.playlist-title-wrapper {
+  text-align: center;
+  transform: translateX(2rem); /* Moves title slightly to the right */
+}
+
+.playlist-header h2 {
+  font-size: 3.5rem;
+  margin: 0;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  animation: titleFloat 0.6s ease-out;
+}
+
+.playlist-stats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.song-count {
+  color: #b3b3b3;
+  font-size: 1.1rem;
+}
+
+.shuffle-all-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.shuffle-all-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
 .back-button {
@@ -102,16 +155,48 @@
   padding: 0.5rem 1rem;
   border-radius: 4px;
   transition: all 0.3s ease;
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: none;
+  color: white;
+  padding: 0.8rem 1.2rem;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.back-icon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.back-text {
+  font-size: 1rem;
 }
 
 .back-button:hover {
-  background: rgba(29, 185, 84, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-5px);
+}
+
+.back-button:hover .back-icon {
+  transform: translateX(-3px);
 }
 
 .playlist-songs {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
 }
 
 .song-item {
@@ -122,10 +207,16 @@
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .song-item:hover {
   background: #282828;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
 }
 
 .song-item-content {
@@ -149,6 +240,8 @@
 
 .song-item.playing {
   background: #282828;
+  background: rgba(29, 185, 84, 0.1);
+  border: 1px solid rgba(29, 185, 84, 0.3);
 }
 
 .song-item.playing .song-title {
@@ -217,4 +310,15 @@
 .remove-song-button:hover {
   color: #ff4444;
   transform: scale(1.1);
-} 
+}
+
+@keyframes titleFloat {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

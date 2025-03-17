@@ -227,46 +227,51 @@ const MusicPlayer = ({
               className="current-song-thumbnail"
             />
             <div className="current-song-info">
-              <div className="current-song-title">{currentSong.title}</div>
+              <div 
+                className={`current-song-title ${
+                  currentSong.title.length > 30 ? 'scrolling' : ''
+                }`}
+              >
+                {currentSong.title}
+              </div>
               <div className="current-song-artist">{currentSong.artist}</div>
             </div>
           </>
         )}
       </div>
-      <div className="controls">
-        <button 
-          className="control-button" 
-          onClick={onPrevious}
-          title="Previous"
-        >
-          <FaStepBackward />
-        </button>
-        <button 
-          className="control-button play-pause" 
-          onClick={handlePlayPause}
-          title={isPlaying ? "Pause" : "Play"}
-        >
-          {isPlaying ? <FaPause /> : <FaPlay />}
-        </button>
-        <button 
-          className="control-button" 
-          onClick={onNext}
-          title="Next"
-        >
-          <FaStepForward />
-        </button>
-        <button 
-          className={`control-button shuffle-button ${isShuffleMode ? 'active' : ''}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onShuffleToggle();
-          }}
-          title={`Shuffle ${isShuffleMode ? 'On' : 'Off'}`}
-        >
-          <FaShuffle />
-        </button>
-      </div>
-      <div className="player-center">
+
+      <div className="controls-wrapper">
+        <div className="controls">
+          <button 
+            className={`shuffle-button ${isShuffleMode ? 'active' : ''}`}
+            onClick={onShuffleToggle}
+            title="Shuffle"
+          >
+            <FaShuffle />
+          </button>
+          <button 
+            className="control-button" 
+            onClick={onPrevious}
+            title="Previous"
+          >
+            <FaStepBackward />
+          </button>
+          <button 
+            className="control-button play-pause" 
+            onClick={handlePlayPause}
+            title={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? <FaPause /> : <FaPlay />}
+          </button>
+          <button 
+            className="control-button" 
+            onClick={onNext}
+            title="Next"
+          >
+            <FaStepForward />
+          </button>
+        </div>
+        
         <div className="progress-container">
           <span className="time">{formatTime(currentTime)}</span>
           <div 
