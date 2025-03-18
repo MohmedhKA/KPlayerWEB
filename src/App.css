@@ -11,6 +11,20 @@
   background-attachment: fixed;
   color: white;
   overflow-x: hidden; /* For tab transitions */
+  transition: background-image 1s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+.app.advanced-active {
+  background-image: url('/home/shin_chan/musicServer/frontend/src/assets/Dark_And_Glow_Theme.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Add a dark overlay to improve readability */
@@ -210,6 +224,23 @@
   opacity: 1;
 }
 
+/* Advanced tab animations */
+.tab-content[data-tab="advanced"] {
+  position: absolute;
+  width: 100%;
+  min-height: 100vh;
+  opacity: 0;
+  transform: translateY(50px); /* Start from below */
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+}
+
+.tab-content[data-tab="advanced"].active {
+  opacity: 1;
+  transform: translateY(0); /* Move to normal position */
+  position: relative;
+}
+
 .app-footer {
   position: fixed;
   bottom: 0;
@@ -388,6 +419,9 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: slideUpFade 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards 0.2s;
 }
 
 .expression-option {
@@ -397,17 +431,29 @@
 }
 
 .expression-option.weather {
-  animation-delay: 0.2s;
+  animation-delay: 0.4s;
 }
 
 .expression-option.facial {
-  animation-delay: 0.4s;
+  animation-delay: 0.6s;
 }
 
 @keyframes fadeUpIn {
   from {
     opacity: 0;
     transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Add new keyframes for slide up animation */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
   to {
     opacity: 1;

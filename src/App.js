@@ -131,8 +131,8 @@ function App() {
   // Update the handleTabChange function
   const handleTabChange = (tab) => {
     // Set slide direction based on current and new tab
-    const currentIndex = ['home', 'playlists', 'expression'].indexOf(activeTab);
-    const newIndex = ['home', 'playlists', 'expression'].indexOf(tab);
+    const currentIndex = ['home', 'playlists', 'advanced'].indexOf(activeTab);
+    const newIndex = ['home', 'playlists', 'advanced'].indexOf(tab);
     setSlideDirection(newIndex > currentIndex ? 'right' : 'left');
     
     // Restore home songs when switching to home tab
@@ -142,7 +142,17 @@ function App() {
     
     // Set the new active tab
     setActiveTab(tab);
-    
+
+    // Toggle the class for Advanced tab
+    const appElement = document.querySelector('.app');
+    if (appElement) {
+      if (tab === 'advanced') {
+        appElement.classList.add('advanced-active');
+      } else {
+        appElement.classList.remove('advanced-active');
+      }
+    }
+
     // Reset scroll position of app-main
     const mainContent = document.querySelector('.app-main');
     if (mainContent) {
@@ -205,10 +215,10 @@ function App() {
             Home
           </button>
           <button
-            className={`tab-button ${activeTab === 'expression' ? 'active' : ''}`}
-            onClick={() => handleTabChange('expression')}
+            className={`tab-button ${activeTab === 'advanced' ? 'active' : ''}`}
+            onClick={() => handleTabChange('advanced')}
           >
-            Expression
+            Advanced
           </button>
           <button
             className={`tab-button ${activeTab === 'playlists' ? 'active' : ''}`}
@@ -239,8 +249,8 @@ function App() {
 
           {/* Expression tab - shows recommended songs */}
           <div 
-            className={`tab-content ${activeTab === 'expression' ? 'active' : ''}`}
-            data-tab="expression"
+            className={`tab-content ${activeTab === 'advanced' ? 'active' : ''}`}
+            data-tab="advanced"
           >
             {!showFacialDetection && !showWeatherDetection ? (
               <>
