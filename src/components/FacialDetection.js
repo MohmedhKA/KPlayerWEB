@@ -82,11 +82,11 @@ const FacialDetection = ({ onEmotionDetected }) => {
 
   const mapExpression = (expressions) => {
     const emotionMap = {
-      happy: ['Joy','Excitement'],
+      happy: ['Joy'],
       sad: ['Sad'],
-      surprised: ['Surprise'],
-      angry: ['Anger', 'Sad'],
-      neutral: ['Excitement'] // Keep using Excitement for neutral
+      surprised: ['Romantic'],
+      angry: ['Anger'],
+      neutral: ['Excitement']
     };
 
     let maxExpression = null;
@@ -102,7 +102,7 @@ const FacialDetection = ({ onEmotionDetected }) => {
 
     // If no valid expression found, return default
     if (!maxExpression || !emotionMap[maxExpression]) {
-      return 'Joy'; // Default emotion
+      return 'Joy';
     }
 
     // Randomly select one emotion from the array of possible emotions
@@ -119,7 +119,6 @@ const FacialDetection = ({ onEmotionDetected }) => {
     detectionRef.current = [];
 
     try {
-      // Take multiple samples over 3 seconds
       for (let i = 0; i < 6; i++) {
         const detections = await faceapi
           .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
@@ -141,7 +140,6 @@ const FacialDetection = ({ onEmotionDetected }) => {
           faceapi.draw.drawDetections(canvasRef.current, resizedDetections);
         }
 
-        // Wait 500ms between samples
         await new Promise(resolve => setTimeout(resolve, 500));
       }
 
@@ -160,7 +158,6 @@ const FacialDetection = ({ onEmotionDetected }) => {
         onEmotionDetected(emotion);
       }
 
-      // Stop the video stream
       const stream = videoRef.current.srcObject;
       if (stream) {
         const tracks = stream.getTracks();

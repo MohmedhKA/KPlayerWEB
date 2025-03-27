@@ -19,7 +19,7 @@ const WeatherDetection = ({ onEmotionDetected, onClose }) => {
       case "thunderstorm":
         return "Anger";
       case "snow":
-        return "Surprise";
+        return "Romantic";
       default:
         return "Joy";
     }
