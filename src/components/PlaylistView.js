@@ -7,20 +7,20 @@ import './PlaylistView.css';
 const BASE_URL = process.env.REACT_APP_API_URL;
 
 const EMOTION_PLAYLISTS = [
-  { id: 'surprise', name: 'Surprise', emotion: 'Surprise', thumbnail: 'Surprise_playlist.jpg' },
+  { id: 'romantic', name: 'Romantic', emotion: 'Romantic', thumbnail: 'Romantic_playlist.jpg' },
   { id: 'sad', name: 'Sad', emotion: 'Sad', thumbnail: 'Sad_playlist.jpg' },
   { id: 'anger', name: 'Anger', emotion: 'Anger', thumbnail: 'Anger_playlist.jpg' },
   { id: 'joy', name: 'Joy', emotion: 'Joy', thumbnail: 'Joy_playlist.jpg' },
-  { id: 'excitement', name: 'Neutral', emotion: 'Excitement', thumbnail: 'Netural_playlist.jpg' } // Changed display name to Neutral
+  { id: 'excitement', name: 'Excitement', emotion: 'Excitement', thumbnail: 'Excitement_playlist.jpg' }
 ];
 
 // Update the color mapping
 const EMOTION_COLORS = {
-  Surprise: '#E4D00A', // Bright yellow
+  Romantic: '#FF69B4', // Pink color for Romantic
   Sad: '#4169E1',     // Royal blue
   Anger: '#FF3838',   // Bright red
   Joy: '#50C878',     // Emerald green
-  Excitement: '#FFFFFF' // White color for Neutral
+  Excitement: '#E4D00A' // Yellow for Excitement
 };
 
 const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {

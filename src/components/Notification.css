@@ -1,0 +1,113 @@
+.notification {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  min-width: 250px;
+  max-width: 350px;
+  background: #333;
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.notification.error {
+  background: #ff4444;
+}
+
+.notification-mini {
+  position: fixed;
+  top: 130px; /* positioned below header */
+  left: 20px;
+  min-width: 300px;
+  background: #2c2c2c;
+  color: white;
+  border: 2px solid #1db954; /* Debug border to ensure visibility */
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10000; /* should be above other elements */
+  overflow: hidden;
+  /*animation: slideIn 0.3s ease;   Temporarily remove animation */
+}
+
+.notification-mini.error {
+  background: #dc3545;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+}
+
+.close-notification {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.notification-close:hover {
+  opacity: 1;
+}
+
+.notification-content {
+  padding: 12px 16px;
+}
+
+.progress-text {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.progress-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #1db954;
+  transition: width 0.3s ease;
+}
+
+.error-message {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.final-status {
+  margin-top: 8px;
+  font-size: 14px;
+  text-align: center;
+  color: #fff;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

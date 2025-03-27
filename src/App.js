@@ -7,6 +7,7 @@ import PlaylistView from './components/PlaylistView';
 import UploadSong from './components/UploadSong';
 import FacialDetection from './components/FacialDetection';
 import WeatherDetection from './components/WeatherDetection';
+import Notification from './components/Notification';
 import './App.css';
 import weatherIcon from './assets/weather.png';
 import faceIcon from './assets/face.png';
@@ -27,6 +28,11 @@ function App() {
   const [isShuffleMode, setIsShuffleMode] = useState(false);
   const [showWeatherDetection, setShowWeatherDetection] = useState(false);
   const [homeSongs, setHomeSongs] = useState([]); // Add this new state
+  const [uploadNotification, setUploadNotification] = useState({
+    show: false,
+    progress: 0,
+    error: null,
+  });
 
   useEffect(() => {
     const fetchSongs = async () => {
@@ -164,6 +170,9 @@ function App() {
   };
 
   const handleUploadComplete = (newSong) => {
+    setShowUpload(false);
+    setUploadNotification({ show: true, progress: 100, error: null });
+    console.log('Upload complete, showing notification', { newSong });
     setAllSongs(prev => [...prev, newSong]);
     setHomeSongs(prev => [...prev, newSong]); // Add to home songs
     if (!currentPlaylist && activeTab === 'home') {
@@ -331,12 +340,21 @@ function App() {
       </button>
 
       {showUpload && (
-        <div onClick={(e) => e.stopPropagation()}>
-          <UploadSong
-            onUploadComplete={handleUploadComplete}
-            onClose={() => setShowUpload(false)}
-          />
-        </div>
+        <UploadSong 
+          onClose={() => setShowUpload(false)} 
+          onUploadComplete={handleUploadComplete}
+          onProgress={(progress) => setUploadNotification({ show: true, progress, error: null })}
+        />
+      )}
+
+      {uploadNotification.show && (
+        <Notification
+          progress={uploadNotification.progress}
+          error={uploadNotification.error}
+          onClose={() =>
+            setUploadNotification({ show: false, progress: 0, error: null })
+          }
+        />
       )}
 
       {showFacialDetection && (
