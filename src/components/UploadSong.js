@@ -12,11 +12,7 @@ const UploadSong = ({ onClose, onUploadComplete, onProgress }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [emotion, setEmotion] = useState('');
   const [error, setError] = useState('');
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [showNotification, setShowNotification] = useState(false);
-  const [notificationError, setNotificationError] = useState(null);
-  // new local state to control modal visibility independent of notification
   const [showModal, setShowModal] = useState(true);
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -39,9 +35,17 @@ const UploadSong = ({ onClose, onUploadComplete, onProgress }) => {
       return;
     }
     
-    // Show notification first, then close modal
     setShowNotification(true);
     setShowModal(false);
+  };
+
+  const handleNotificationClose = () => {
+    setShowNotification(false);
+    onClose && onClose();
+  };
+
+  const handleUploadComplete = (song) => {
+    onUploadComplete && onUploadComplete(song);
   };
 
   return ReactDOM.createPortal(
@@ -50,11 +54,8 @@ const UploadSong = ({ onClose, onUploadComplete, onProgress }) => {
         <Notification
           songFile={selectedFile}
           emotion={emotion}
-          onClose={() => {
-            setShowNotification(false);
-            onClose && onClose();
-          }}
-          onUploadComplete={onUploadComplete}
+          onClose={handleNotificationClose}
+          onUploadComplete={handleUploadComplete}
         />
       )}
       
@@ -110,25 +111,12 @@ const UploadSong = ({ onClose, onUploadComplete, onProgress }) => {
 
               {error && <div className="error-message">❌ {error}</div>}
 
-              {uploading && (
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              )}
-
               <button
                 type="submit"
                 className="upload-button"
-                disabled={!selectedFile || !emotion || uploading}
+                disabled={!selectedFile || !emotion}
               >
-                {uploading ? (
-                  <>📤 Uploading... {Math.round(uploadProgress)}%</>
-                ) : (
-                  <>🚀 Upload Song</>
-                )}
+                <>🚀 Upload Song</>
               </button>
             </form>
           </div>

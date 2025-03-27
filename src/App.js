@@ -330,10 +330,7 @@ function App() {
 
       <button 
         className="upload-fab"
-        onClick={() => {
-          console.log('FAB clicked');
-          setShowUpload(true);
-        }}
+        onClick={() => setShowUpload(true)}
         aria-label="Upload song"
       >
         +
