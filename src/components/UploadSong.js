@@ -8,12 +8,15 @@ import './UploadSong.css';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 
-const UploadSong = ({ onClose, onUploadComplete, onProgress }) => {
+const UploadSong = ({ onClose, onUploadComplete }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [emotion, setEmotion] = useState('');
   const [error, setError] = useState('');
   const [showNotification, setShowNotification] = useState(false);
   const [showModal, setShowModal] = useState(true);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState(null);
+  const [notificationMessage, setNotificationMessage] = useState('');
 
   const onDrop = useCallback((acceptedFiles) => {
     setSelectedFile(acceptedFiles[0]);
@@ -28,15 +31,50 @@ const UploadSong = ({ onClose, onUploadComplete, onProgress }) => {
     multiple: false
   });
 
-  const handleUpload = (e) => {
+  const handleUpload = async (e) => {
     e.preventDefault();
     if (!selectedFile || !emotion) {
       setError('Please select a file and emotion');
       return;
     }
-    
-    setShowNotification(true);
+
     setShowModal(false);
+    setShowNotification(true);
+    setUploadStatus('uploading');
+
+    try {
+      const formData = new FormData();
+      formData.append('song', selectedFile);
+      formData.append('emotion', emotion);
+      formData.append('timestamp', new Date().getTime());
+
+      const response = await axios.post(`${BASE_URL}/api/music/upload`, formData, {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'Cache-Control': 'no-cache'
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setUploadProgress(progress);
+          }
+        }
+      });
+
+      if (response.data.success) {
+        setUploadProgress(100);
+        setUploadStatus('success');
+        onUploadComplete && onUploadComplete(response.data.data);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadStatus('error');
+      setNotificationMessage(
+        error.response?.status === 409
+          ? 'File already exists'
+          : error.response?.data?.message || 'Upload failed'
+      );
+    }
   };
 
   const handleNotificationClose = () => {
@@ -44,18 +82,14 @@ const UploadSong = ({ onClose, onUploadComplete, onProgress }) => {
     onClose && onClose();
   };
 
-  const handleUploadComplete = (song) => {
-    onUploadComplete && onUploadComplete(song);
-  };
-
   return ReactDOM.createPortal(
     <>
       {showNotification && (
         <Notification
-          songFile={selectedFile}
-          emotion={emotion}
+          message={notificationMessage}
+          type={uploadStatus}
+          progress={uploadProgress}
           onClose={handleNotificationClose}
-          onUploadComplete={handleUploadComplete}
         />
       )}
       
