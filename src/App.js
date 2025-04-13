@@ -27,7 +27,7 @@ function App() {
   const [showFacialDetection, setShowFacialDetection] = useState(false);
   const [isShuffleMode, setIsShuffleMode] = useState(false);
   const [showWeatherDetection, setShowWeatherDetection] = useState(false);
-  const [homeSongs, setHomeSongs] = useState([]); // Add this new state
+  const [homeSongs, setHomeSongs] = useState([]);
   const [uploadNotification, setUploadNotification] = useState({
     show: false,
     progress: 0,
@@ -56,7 +56,7 @@ function App() {
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-        e.preventDefault(); // Prevent page scroll
+        e.preventDefault();
         const playPauseButton = document.querySelector('.play-pause');
         if (playPauseButton) {
           playPauseButton.click();
@@ -72,7 +72,6 @@ function App() {
     console.log('showUpload state changed:', showUpload);
   }, [showUpload]);
 
-  // Update the handleSongSelect function
   const handleSongSelect = (song, shuffledList = null, enableShuffle = false) => {
     const { audioUrl, ...songWithoutAudioUrl } = song;
     let newIndex = allSongs.findIndex(s => s.id === song.id);
@@ -94,7 +93,7 @@ function App() {
       ).filter(i => i !== currentIndex);
       
       if (possibleIndices.length === 0) {
-        nextIndex = 0; // Reset to start if no other songs
+        nextIndex = 0;
       } else {
         nextIndex = possibleIndices[Math.floor(Math.random() * possibleIndices.length)];
       }
@@ -121,7 +120,6 @@ function App() {
       setHomeSongs(results);
     }
     setDisplayedSongs(results);
-    // Don't modify recommendedSongs here
   };
 
   const handlePlaylistSelect = (playlistSongs) => {
@@ -136,20 +134,16 @@ function App() {
 
   // Update the handleTabChange function
   const handleTabChange = (tab) => {
-    // Set slide direction based on current and new tab
     const currentIndex = ['home', 'playlists', 'advanced'].indexOf(activeTab);
     const newIndex = ['home', 'playlists', 'advanced'].indexOf(tab);
     setSlideDirection(newIndex > currentIndex ? 'right' : 'left');
     
-    // Restore home songs when switching to home tab
     if (tab === 'home') {
       setDisplayedSongs(homeSongs);
     }
     
-    // Set the new active tab
     setActiveTab(tab);
 
-    // Toggle the class for Advanced tab
     const appElement = document.querySelector('.app');
     if (appElement) {
       if (tab === 'advanced') {
@@ -164,7 +158,7 @@ function App() {
     if (mainContent) {
       mainContent.scrollTo({
         top: 0,
-        behavior: 'instant' // Use 'smooth' for animated scroll
+        behavior: 'instant'
       });
     }
   };
@@ -174,7 +168,7 @@ function App() {
     setUploadNotification({ show: true, progress: 100, error: null });
     console.log('Upload complete, showing notification', { newSong });
     setAllSongs(prev => [...prev, newSong]);
-    setHomeSongs(prev => [...prev, newSong]); // Add to home songs
+    setHomeSongs(prev => [...prev, newSong]);
     if (!currentPlaylist && activeTab === 'home') {
       setDisplayedSongs(prev => [...prev, newSong]);
     }
@@ -184,7 +178,7 @@ function App() {
   const handleEmotionDetected = (emotion) => {
     const filteredSongs = allSongs.filter(song => song.emotion === emotion);
     setRecommendedSongs(filteredSongs);
-    setDisplayedSongs(filteredSongs); // Add this line
+    setDisplayedSongs(filteredSongs);
     setShowFacialDetection(false);
   };
 
@@ -192,7 +186,7 @@ function App() {
   const handleWeatherEmotion = (emotion) => {
     const filteredSongs = allSongs.filter(song => song.emotion === emotion);
     setRecommendedSongs(filteredSongs);
-    setDisplayedSongs(filteredSongs); // Add this line
+    setDisplayedSongs(filteredSongs);
     setShowWeatherDetection(false);
   };
 
