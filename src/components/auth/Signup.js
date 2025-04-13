@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import './Login.css';
 
 const Signup = ({ onSignup, switchToLogin }) => {
@@ -16,6 +16,8 @@ const Signup = ({ onSignup, switchToLogin }) => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear error when user types
+    if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
@@ -28,19 +30,27 @@ const Signup = ({ onSignup, switchToLogin }) => {
     }
 
     try {
-      const response = await axios.post('https://100.102.217.22:3000/api/auth/signup', {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password
-      });
+      // Remove confirmPassword before sending
+      const { confirmPassword, ...signupData } = formData;
+      
+      // Add /api prefix to the route
+      const response = await api.post('/api/auth/signup', signupData);
 
       if (response.data.success) {
-        localStorage.setItem('token', response.data.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.data.user));
-        onSignup(response.data.data.user);
+        const { token, user } = response.data.data;
+        // Store token first
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        // Update Authorization header for future requests
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        
+        // Call onSignup with user data
+        onSignup(user);
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Signup failed');
+      console.error('Signup error:', error);
+      setError(error.response?.data?.message || 'Signup failed. Please try again.');
     }
   };
 

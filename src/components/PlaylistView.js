@@ -3,6 +3,7 @@ import axios from 'axios';
 import { FaPlay, FaPause, FaTrash } from 'react-icons/fa';
 import { FaShuffle } from 'react-icons/fa6';
 import './PlaylistView.css';
+import api from '../utils/api';
 
 const BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -44,16 +45,15 @@ const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {
 
   const fetchUserPlaylists = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/api/playlists`);
+      const response = await api.get('/api/playlists');
       if (response.data.success) {
-        // Also fetch songs for each playlist
         const playlists = response.data.data;
         setUserPlaylists(playlists);
         
-        // Fetch songs for each playlist
+        // Fetch songs for each playlist using api instance
         playlists.forEach(async (playlist) => {
           try {
-            const songsResponse = await axios.get(`${BASE_URL}/api/playlists/${playlist.id}`);
+            const songsResponse = await api.get(`/api/playlists/${playlist.id}`);
             if (songsResponse.data.success) {
               setPlaylistSongs(prev => ({
                 ...prev,
@@ -70,29 +70,19 @@ const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {
     }
   };
 
-  const fetchPlaylistSongs = async (playlist) => {
+  const fetchPlaylistSongs = async (emotion) => {
     try {
-      if (playlist.emotion) {
-        // Emotion playlist
-        const response = await axios.get(`${BASE_URL}/api/music?emotion=${playlist.emotion}`);
-        if (response.data.success) {
-          setPlaylistSongs(prev => ({
-            ...prev,
-            [playlist.id]: response.data.data
-          }));
-        }
-      } else {
-        // User playlist
-        const response = await axios.get(`${BASE_URL}/api/playlists/${playlist.id}`);
-        if (response.data.success) {
-          setPlaylistSongs(prev => ({
-            ...prev,
-            [playlist.id]: response.data.data.songs
-          }));
-        }
+      const response = await api.get('/api/music', {
+        params: { playlist: emotion }
+      });
+      
+      if (response.data.success) {
+        return response.data.data;
       }
+      return [];
     } catch (error) {
-      console.error(`Error fetching songs for playlist ${playlist.name}:`, error);
+      console.error(`Error fetching songs for playlist ${emotion}:`, error);
+      return [];
     }
   };
 
@@ -103,7 +93,9 @@ const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {
     try {
       if (playlist.emotion) {
         // Emotion playlist
-        const response = await axios.get(`${BASE_URL}/api/music?emotion=${playlist.emotion}`);
+        const response = await api.get('/api/music', {
+          params: { emotion: playlist.emotion }
+        });
         if (response.data.success) {
           const songs = response.data.data;
           setPlaylistSongs(prev => ({
@@ -114,7 +106,7 @@ const PlaylistView = ({ onPlaylistSelect, currentSong, onSongSelect }) => {
         }
       } else {
         // User playlist
-        const response = await axios.get(`${BASE_URL}/api/playlists/${playlist.id}`);
+        const response = await api.get(`/api/playlists/${playlist.id}`);
         if (response.data.success) {
           const songs = response.data.data.songs;
           setPlaylistSongs(prev => ({

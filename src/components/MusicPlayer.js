@@ -30,6 +30,7 @@ const MusicPlayer = ({
   const progressBarRef = useRef(null);
   const seekTimeout = useRef(null);
   const previousVolume = useRef(volume);
+  const audioRef = useRef(null);
 
   const updateTimeAndProgress = useCallback(() => {
     if (!soundRef.current) return;
@@ -87,36 +88,26 @@ const MusicPlayer = ({
           const sound = new Howl({
             src: [currentSong.fileUrl],
             html5: true,
+            format: ['mp3'],
             volume: volume,
+            xhr: {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              }
+            },
             onload: () => {
+              console.log('Audio loaded successfully for:', currentSong.title, 'Duration:', sound.duration());
               setDuration(sound.duration());
               setIsLoading(false);
               sound.play();
             },
             onplay: () => {
+              console.log('Audio playback started for:', currentSong.title);
               setIsPlaying(true);
               startProgressInterval();
             },
-            onpause: () => {
-              setIsPlaying(false);
-              stopProgressInterval();
-            },
-            onstop: () => {
-              setIsPlaying(false);
-              stopProgressInterval();
-            },
-            onend: () => {
-              stopProgressInterval();
-              setProgress(0);
-              setCurrentTime(0);
-              setIsPlaying(false);
-              onNext();
-            },
-            onseek: () => {
-              updateTimeAndProgress();
-            },
             onloaderror: (id, error) => {
-              console.error('Error loading song:', error);
+              console.error('Error loading song (Howl onloaderror):', currentSong ? currentSong.title : 'Unknown', 'Error:', error);
               setIsLoading(false);
               setIsPlaying(false);
             }
@@ -124,7 +115,7 @@ const MusicPlayer = ({
 
           soundRef.current = sound;
         } catch (error) {
-          console.error('Error loading song:', error);
+          console.error('Error creating Howl instance for song:', currentSong ? currentSong.title : 'Unknown', 'Error:', error);
           setIsLoading(false);
         }
       }
@@ -138,11 +129,8 @@ const MusicPlayer = ({
         soundRef.current.unload();
       }
       stopProgressInterval();
-      if (seekTimeout.current) {
-        clearTimeout(seekTimeout.current);
-      }
     };
-  }, [currentSong, startProgressInterval, stopProgressInterval, updateTimeAndProgress]);
+  }, [currentSong, volume, startProgressInterval, stopProgressInterval]);
 
   useEffect(() => {
     if (soundRef.current) {
@@ -216,15 +204,22 @@ const MusicPlayer = ({
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const handleThumbnailError = (e) => {
+    console.error('Thumbnail error loading for song:', currentSong ? currentSong.title : 'No current song', 'Original src:', e.target.src);
+    e.target.src = `${BASE_URL}/api/thumbnails/default.jpg`;
+    console.log('Using default thumbnail for:', currentSong?.title);
+  };
+
   return (
     <div className="music-player">
       <div className="now-playing">
         {currentSong && (
           <>
             <img 
-              src={currentSong.thumbnailUrl || `${BASE_URL}/thumbnails/default.jpg`}
+              src={currentSong.thumbnailUrl || `${BASE_URL}/api/thumbnails/default.jpg`}
               alt={currentSong.title}
               className="current-song-thumbnail"
+              onError={handleThumbnailError}
             />
             <div className="current-song-info">
               <div 

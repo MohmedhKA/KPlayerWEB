@@ -47,13 +47,12 @@ function App() {
         if (response.data.success) {
           const songs = response.data.data;
           setAllSongs(songs);
-          setHomeSongs(songs);  // Set home songs
+          setHomeSongs(songs);
           setDisplayedSongs(songs);
         }
       } catch (error) {
         console.error('Error fetching songs:', error);
         if (error.response?.status === 401) {
-          // Handle unauthorized error - maybe redirect to login
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           window.location.reload();

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import './Login.css';
 
 const Login = ({ onLogin, switchToSignup }) => {
@@ -20,23 +20,35 @@ const Login = ({ onLogin, switchToSignup }) => {
     e.preventDefault();
     setError('');
 
+    if (!formData.identifier || !formData.password) {
+      setError('Please enter both username/email and password');
+      return;
+    }
+
     try {
-      const response = await axios.post('https://100.102.217.22:3000/api/auth/login', formData);
+      console.log('Attempting login with identifier:', formData.identifier);
+      const response = await api.post('/api/auth/login', formData);
       
       if (response.data.success) {
-        localStorage.setItem('token', response.data.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.data.user));
-        onLogin(response.data.data.user);
+        const { token, user } = response.data.data;
+        console.log('Login successful, storing token and user data');
+        
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        onLogin(user);
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Login failed');
+      console.error('Login error:', error.response?.data || error);
+      setError(error.response?.data?.message || 'Login failed. Please try again.');
     }
   };
 
   return (
     <div className="auth-container">
       <div className="auth-box">
-        <h2>Login to KPlayer</h2>
+        <h2>Login to Your Account</h2>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">

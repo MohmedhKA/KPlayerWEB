@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import api from '../utils/api';
 
 const AuthContext = createContext(null);
 
@@ -7,22 +8,27 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check for existing token and user data on mount
+    const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    
+    if (token && storedUser) {
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(JSON.parse(storedUser));
     }
+    
     setIsLoading(false);
   }, []);
 
   const login = (userData) => {
     setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    delete api.defaults.headers.common['Authorization'];
+    setUser(null);
   };
 
   return (
