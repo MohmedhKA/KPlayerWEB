@@ -11,8 +11,12 @@ import Notification from './components/Notification';
 import './App.css';
 import weatherIcon from './assets/weather.png';
 import faceIcon from './assets/face.png';
+import { AuthProvider } from './context/AuthContext';
+import AuthPage from './components/auth/AuthPage';
+import { useAuth } from './context/AuthContext';  // Add this import
+import api from './utils/api';
 
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001'; // Add fallback URL
+const BASE_URL = process.env.REACT_APP_API_URL; // Add fallback URL
 
 function App() {
   const [allSongs, setAllSongs] = useState([]);
@@ -34,10 +38,12 @@ function App() {
     error: null,
   });
 
+  const { user, isLoading } = useAuth();
+
   useEffect(() => {
     const fetchSongs = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/music`); // Update endpoint path
+        const response = await api.get('/api/music');
         if (response.data.success) {
           const songs = response.data.data;
           setAllSongs(songs);
@@ -46,11 +52,19 @@ function App() {
         }
       } catch (error) {
         console.error('Error fetching songs:', error);
+        if (error.response?.status === 401) {
+          // Handle unauthorized error - maybe redirect to login
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.reload();
+        }
       }
     };
 
-    fetchSongs();
-  }, []);
+    if (user) {
+      fetchSongs();
+    }
+  }, [user]);
 
   // Modify the space bar handler in useEffect
   useEffect(() => {
@@ -201,6 +215,14 @@ function App() {
     setRecommendedSongs([]);
     setDisplayedSongs(homeSongs);
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return <AuthPage />;
+  }
 
   return (
     <div className="app">
@@ -370,4 +392,10 @@ function App() {
   );
 }
 
-export default App;
+export default function AppWrapper() {
+  return (
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  );
+}
