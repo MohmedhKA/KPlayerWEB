@@ -8,6 +8,8 @@ import UploadSong from './components/UploadSong';
 import FacialDetection from './components/FacialDetection';
 import WeatherDetection from './components/WeatherDetection';
 import Notification from './components/Notification';
+import Login from './components/auth/Login';
+import Signup from './components/auth/Signup';
 import './App.css';
 import weatherIcon from './assets/weather.png';
 import faceIcon from './assets/face.png';
@@ -33,6 +35,17 @@ function App() {
     progress: 0,
     error: null,
   });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLogin, setShowLogin] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const expiry = localStorage.getItem('expiry');
+    
+    if (token && expiry && Date.now() < parseInt(expiry)) {
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchSongs = async () => {
@@ -201,6 +214,22 @@ function App() {
     setRecommendedSongs([]);
     setDisplayedSongs(homeSongs);
   };
+
+  const handleLogin = (userData) => {
+    setIsAuthenticated(true);
+  };
+
+  const handleSignup = (userData) => {
+    setShowLogin(true);
+  };
+
+  if (!isAuthenticated) {
+    return showLogin ? (
+      <Login onLogin={handleLogin} switchToSignup={() => setShowLogin(false)} />
+    ) : (
+      <Signup onSignup={handleSignup} switchToLogin={() => setShowLogin(true)} />
+    );
+  }
 
   return (
     <div className="app">

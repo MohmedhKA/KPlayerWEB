@@ -1,0 +1,124 @@
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1e2024 0%, #17181c 100%);
+  padding: 20px;
+}
+
+.auth-box {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 0 20px rgba(29, 185, 84, 0.1);
+  border: 1px solid rgba(29, 185, 84, 0.1);
+  animation: glow 2s infinite alternate;
+}
+
+.auth-box h2 {
+  color: #fff;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.logo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 2rem;
+  display: block;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgba(29, 185, 84, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #1db954;
+  box-shadow: 0 0 10px rgba(29, 185, 84, 0.3);
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #1db954;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.auth-button:hover {
+  background: #1ed760;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(29, 185, 84, 0.4);
+}
+
+.switch-auth {
+  margin-top: 1.5rem;
+  text-align: center;
+  color: #fff;
+}
+
+.switch-button {
+  background: none;
+  border: none;
+  color: #1db954;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  font-size: inherit;
+}
+
+.switch-button:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  background: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 20px rgba(29, 185, 84, 0.1);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(29, 185, 84, 0.2);
+  }
+}
